@@ -3,7 +3,7 @@ GET http://localhost:3000/api/deportes
 
 
 ### obtener un deporte
-GET http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad'
+GET http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad
 
 ### crear un nuevo deporte
 POST http://localhost:3000/api/deportes
@@ -18,7 +18,7 @@ Content-Type: application/json
 }
 
 ### modificar un deporte (PUT - recurso completo e idempotente)
-PUT http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad'
+PUT http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad
 Content-Type: application/json
 
 {
@@ -29,7 +29,7 @@ Content-Type: application/json
 }
 
 ### modificar un deporte (PATCH - recurso parcial)
-PATCH http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad'
+PATCH http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad
 Content-Type: application/json
 
 {
@@ -39,4 +39,4 @@ Content-Type: application/json
 }
 
 ### borrar un deporte
-DELETE http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad'
+DELETE http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad

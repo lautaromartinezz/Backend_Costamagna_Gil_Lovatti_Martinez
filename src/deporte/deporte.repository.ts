@@ -7,7 +7,7 @@ const deportes = [
     11,
     22,
     2,
-    "a02b91bc-3769-4221-beb1-d7a3aeba7dad'"
+    "a02b91bc-3769-4221-beb1-d7a3aeba7dad"
   ),
 ]
 
@@ -38,9 +38,9 @@ export class DeporteRepository implements Repository<Deporte> {
     const deporteIdx = deportes.findIndex((deporte) => deporte.id === item.id)
 
     if (deporteIdx !== -1) {
-      const deletedCharacters = deportes[deporteIdx]
+      const deletedDeporte = deportes[deporteIdx]
       deportes.splice(deporteIdx, 1)
-      return deletedCharacters
+      return deletedDeporte
     }
   }
 }

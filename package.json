@@ -2,7 +2,7 @@
   "name": "backend_costamagna_gil_lovatti_martinez",
   "type": "module",
   "version": "1.0.0",
-  "description": "",
+  "description": "Repositorio para el back del trabajo practico de dsw",
   "main": "app.js",
   "scripts": {
     "build": "tsc -p ./tsconfig.json",
@@ -19,5 +19,13 @@
   },
   "dependencies": {
     "express": "^5.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lautaromartinezz/Backend_Costamagna_Gil_Lovatti_Martinez.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lautaromartinezz/Backend_Costamagna_Gil_Lovatti_Martinez/issues"
+  },
+  "homepage": "https://github.com/lautaromartinezz/Backend_Costamagna_Gil_Lovatti_Martinez#readme"
 }

@@ -1,0 +1,39 @@
+### obtener todos los establecimientos
+GET http://localhost:3000/api/establecimientos
+
+
+### obtener un establecimiento
+GET http://localhost:3000/api/establecimientos/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+
+### crear un nuevo establecimiento
+POST http://localhost:3000/api/establecimientos
+Content-Type: application/json
+
+{
+  "nombre" : "Club Somisa",
+  "direccion" : "los ceibos 1950",
+  "localidad" : "San Nicolas de los Arroyos"
+
+}
+
+### modificar un establecimiento (PUT - recurso completo e idempotente)
+PUT http://localhost:3000/api/establecimientos/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+Content-Type: application/json
+
+{
+  "nombre" : "Club Atletico Rosario",
+  "direccion" : "Pasaje Gould 865",
+  "localidad" : "Rosario"
+}
+
+### modificar un establecimiento (PATCH - recurso parcial)
+PATCH http://localhost:3000/api/establecimientos/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+Content-Type: application/json
+
+{
+  "nombre" : "Club Regatas San Nicolas",
+  "direccion" : "Juan Manuel de Rosas 100",
+}
+
+### borrar un establecimiento
+DELETE http://localhost:3000/api/establecimientos/a02b91bc-3769-4221-beb1-d7a3aeba7dad
