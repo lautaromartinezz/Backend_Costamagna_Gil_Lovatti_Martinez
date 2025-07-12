@@ -11,7 +11,7 @@ Content-Type: application/json
     "nombre": "Futbol",
     "cantMinJugadores": 11,
     "cantMaxJugadores": 11,
-    "duracion": 90,
+    "duracion": 90
 }
 
 ### ID
@@ -65,7 +65,7 @@ Content-Type: application/json
 {
   "nombre" : "tenis cambiado",
   "cantMinJugadores": 2,
-  "cantMaxJugadores": 4,
+  "cantMaxJugadores": 4
 
 
 }
