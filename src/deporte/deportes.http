@@ -62,13 +62,9 @@ PATCH http://localhost:3000/api/deportes/{{idToDelete}}
 Content-Type: application/json
 
 {
-{
   "nombre" : "tenis cambiado",
   "cantMinJugadores": 2,
   "cantMaxJugadores": 4
-
-
-}
 }
 
 ### DELETE a character
