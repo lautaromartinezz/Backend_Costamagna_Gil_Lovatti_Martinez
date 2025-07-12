@@ -21,7 +21,4 @@ export class Deporte extends BaseEntity {
 
   @Property({ nullable: false })
   duracion!: number;
-
-  @Property({ nullable: false })
-  id!: number;
 }
