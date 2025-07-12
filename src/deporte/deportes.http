@@ -1,12 +1,27 @@
-### obtener todos los deportes
-GET http://localhost:3000/api/deportes
+### GET all deportes
+http://localhost:3000/api/deportes
 
 
-### obtener un deporte
-GET http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad
-
-### crear un nuevo deporte
+### POST a character
+# @name createFutbol
 POST http://localhost:3000/api/deportes
+Content-Type: application/json
+
+{
+    "nombre": "Futbol",
+    "cantMinJugadores": 11,
+    "cantMaxJugadores": 11,
+    "duracion": 90,
+}
+
+### ID
+@id = {{createFutbol.response.body.data.id}}
+
+### GET one character
+http://localhost:3000/api/deportes/{{id}}
+
+### PUT a character
+PUT http://localhost:3000/api/deportes/{{id}}
 Content-Type: application/json
 
 {
@@ -14,29 +29,47 @@ Content-Type: application/json
   "cantMinJugadores": 2,
   "cantMaxJugadores": 4,
   "duracion": 20
-
 }
 
-### modificar un deporte (PUT - recurso completo e idempotente)
-PUT http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+### POST a character
+POST http://localhost:3000/api/deportes
 Content-Type: application/json
 
 {
-  "nombre":"basquet",
-  "cantMinJugadores": 5,
-  "cantMaxJugadores": 10,
-  "duracion": 40
+    "nombre": "Rugby",
+    "cantMinJugadores": 15,
+    "cantMaxJugadores": 15,
+    "duracion": 80
 }
 
-### modificar un deporte (PATCH - recurso parcial)
-PATCH http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+### POST a character
+# @name createDeporteToDelete
+POST http://localhost:3000/api/deportes
 Content-Type: application/json
 
 {
-  "cantMinJugadores": 5,
-  "cantMaxJugadores": 10,
-  "duracion": 20  
+    "nombre": "Basketball",
+    "cantMinJugadores": 5,
+    "cantMaxJugadores": 5,
+    "duracion": 48
+}
+### DELETE a character
+@idToDelete = {{createDeporteToDelete.response.body.data.id}}
+DELETE http://localhost:3000/api/deportes/{{idToDelete}}
+
+### PATCH a character
+PATCH http://localhost:3000/api/deportes/{{idToDelete}}
+Content-Type: application/json
+
+{
+{
+  "nombre" : "tenis cambiado",
+  "cantMinJugadores": 2,
+  "cantMaxJugadores": 4,
+
+
+}
 }
 
-### borrar un deporte
-DELETE http://localhost:3000/api/deportes/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+### DELETE a character
+DELETE http://localhost:3000/api/deportes/{{idToDelete}}
