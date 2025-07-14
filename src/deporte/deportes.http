@@ -2,7 +2,7 @@
 http://localhost:3000/api/deportes
 
 
-### POST a character
+### POST a deporte
 # @name createFutbol
 POST http://localhost:3000/api/deportes
 Content-Type: application/json
@@ -17,10 +17,10 @@ Content-Type: application/json
 ### ID
 @id = {{createFutbol.response.body.data.id}}
 
-### GET one character
+### GET one deporte
 http://localhost:3000/api/deportes/{{id}}
 
-### PUT a character
+### PUT a deporte
 PUT http://localhost:3000/api/deportes/{{id}}
 Content-Type: application/json
 
@@ -31,7 +31,7 @@ Content-Type: application/json
   "duracion": 20
 }
 
-### POST a character
+### POST a deporte
 POST http://localhost:3000/api/deportes
 Content-Type: application/json
 
@@ -42,7 +42,7 @@ Content-Type: application/json
     "duracion": 80
 }
 
-### POST a character
+### POST a deporte
 # @name createDeporteToDelete
 POST http://localhost:3000/api/deportes
 Content-Type: application/json
@@ -53,11 +53,11 @@ Content-Type: application/json
     "cantMaxJugadores": 5,
     "duracion": 48
 }
-### DELETE a character
+### DELETE a deporte
 @idToDelete = {{createDeporteToDelete.response.body.data.id}}
 DELETE http://localhost:3000/api/deportes/{{idToDelete}}
 
-### PATCH a character
+### PATCH a deporte
 PATCH http://localhost:3000/api/deportes/{{idToDelete}}
 Content-Type: application/json
 
@@ -67,5 +67,5 @@ Content-Type: application/json
   "cantMaxJugadores": 4
 }
 
-### DELETE a character
+### DELETE a deporte
 DELETE http://localhost:3000/api/deportes/{{idToDelete}}
