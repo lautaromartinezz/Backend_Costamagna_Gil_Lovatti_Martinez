@@ -1,11 +1,8 @@
 ### obtener todos los establecimientos
 GET http://localhost:3000/api/establecimientos
 
-
-### obtener un establecimiento
-GET http://localhost:3000/api/establecimientos/a02b91bc-3769-4221-beb1-d7a3aeba7dad
-
 ### crear un nuevo establecimiento
+# @name createSomisa
 POST http://localhost:3000/api/establecimientos
 Content-Type: application/json
 
@@ -16,8 +13,14 @@ Content-Type: application/json
 
 }
 
+### ID
+@id = {{createSomisa.response.body.data.id}}
+
+### obtener un establecimiento
+GET http://localhost:3000/api/establecimientos/{{id}}
+
 ### modificar un establecimiento (PUT - recurso completo e idempotente)
-PUT http://localhost:3000/api/establecimientos/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+PUT http://localhost:3000/api/establecimientos/{{id}}
 Content-Type: application/json
 
 {
@@ -27,13 +30,13 @@ Content-Type: application/json
 }
 
 ### modificar un establecimiento (PATCH - recurso parcial)
-PATCH http://localhost:3000/api/establecimientos/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+PATCH http://localhost:3000/api/establecimientos/{{id}}
 Content-Type: application/json
 
 {
   "nombre" : "Club Regatas San Nicolas",
-  "direccion" : "Juan Manuel de Rosas 100",
+  "direccion" : "Juan Manuel de Rosas 100"
 }
 
 ### borrar un establecimiento
-DELETE http://localhost:3000/api/establecimientos/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+DELETE http://localhost:3000/api/establecimientos/{{id}}

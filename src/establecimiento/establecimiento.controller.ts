@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { Establecimiento } from './establecimiento.entity.js'
-import { EstablecimientoRepository } from './establecimiento.repository.js'
+import { orm } from '../shared/db/orm.js' 
 
-const repository = new EstablecimientoRepository()
+const em = orm.em;
 
 function sanitizeEstablecimientoInput(req: Request, res: Response, next: NextFunction) {
     req.body.sanitizedInput = {
@@ -19,55 +19,56 @@ function sanitizeEstablecimientoInput(req: Request, res: Response, next: NextFun
   next()
 }
 
-function findAll(req: Request, res: Response) {
-    res.json({ data: repository.findAll() })
+async function findAll(req: Request, res: Response) {
+    try{
+      const establecimientos = await em.find(Establecimiento, {})
+      res.status(200).json({ message: 'Establecimientos encontrados satisfactoriamente', data: establecimientos })
+    }catch (error: any) {
+      res.status(500).json({ message: 'Error al recuperar los establecimientos'})
+    }
 }
 
-function findOne(req: Request, res: Response) {
-  const id = req.params.id
-  const establecimiento = repository.findOne({ id })
-  if (!establecimiento) {
-    res.status(404).send({ message: 'Establecimiento not found' })
-    return
+async function findOne(req: Request, res: Response) {
+ try{
+const id = Number.parseInt(req.params.id)
+const establecimiento = await em.findOneOrFail(Establecimiento, {id})
+res.status(200).json({ message: 'Establecimiento encontrado', data: establecimiento })  
+ }catch (error: any) {
+    res.status(500).json({ message: 'Establecimiento no encontrado'})
+}}
+
+async function add(req: Request, res: Response) {
+ try{
+  const establecimiento = em.create(Establecimiento, req.body.sanitizedInput)
+  await em.flush()
+  res.status(201).json({ message: 'Establecimiento creado', data: establecimiento })
+ }catch (error: any) {
+    res.status(500).json({ message: 'Error al crear el establecimiento'})
   }
-  res.json({ data: establecimiento })
 }
 
-function add(req: Request, res: Response) {
-  const input = req.body.sanitizedInput
-
-  const establecimientoInput = new Establecimiento(
-    input.nombre,
-    input.direccion,
-    input.localidad,
-  )
-
-  const establecimiento = repository.add(establecimientoInput)
-  res.status(201).send({ message: 'Establecimiento created', data: establecimiento })
+async function update(req: Request, res: Response) {
+ try{
+  const id = Number.parseInt(req.params.id)
+  const establecimientoToUpdate= await em.findOneOrFail(Establecimiento, { id })
+  em.assign(establecimientoToUpdate, req.body.sanitizedInput)
+  await em.flush()
+  res.status(200).json({ message: 'Establecimiento actualizado', data: establecimientoToUpdate })
+ } catch (error: any) {
+    res.status(500).json({ message: 'Error al actualizar el establecimiento' })
+  }
 }
 
-function update(req: Request, res: Response) {
-    req.body.sanitizedInput.id = req.params.id
-    const establecimiento = repository.update(req.body.sanitizedInput)
-    
-    if (!establecimiento) {
-        res.status(404).send({ message: 'Establecimiento not found' })
-        return
+async function remove(req: Request, res: Response) {
+    try{
+  const id = Number.parseInt(req.params.id)
+  const establecimientoToRemove = await em.findOneOrFail(Establecimiento, { id })
+  em.remove(establecimientoToRemove)
+  await em.flush()
+  res.status(200).json({ message: 'Establecimiento eliminado' })
+ } catch (error: any) {
+    res.status(500).json({ message: 'Error al eliminar el establecimiento' })
     }
-    
-    res.json({ message: 'Establecimiento updated', data: establecimiento })
-    }
-
-function remove(req: Request, res: Response) {
-    const id = req.params.id
-    const establecimiento = repository.delete({ id })
-    
-    if (!establecimiento) {
-        res.status(404).send({ message: 'Establecimiento not found' })
-        return
-    }
-    
-    res.json({ message: 'Establecimiento removed', data: establecimiento })
 }
 
 export { sanitizeEstablecimientoInput, findAll, findOne, add, update, remove }
