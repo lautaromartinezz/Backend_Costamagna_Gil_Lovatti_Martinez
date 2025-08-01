@@ -1,0 +1,75 @@
+### GET all eventos
+http://localhost:3000/api/eventos
+
+
+### POST a evento
+# @name createEvento
+POST http://localhost:3000/api/eventos
+Content-Type: application/json
+
+{
+    "nombre": "Mundial FIFA",
+    "esPublico": true,
+    "cantEquiposMax": 32,
+    "contraseña": "1234",
+    "fechaInicioInscripcion": "2025-10-01T00:00:00Z",
+    "fechaFinInscripcion": "2025-10-15T00:00:00Z",
+    "fechaInicioEvento": "2025-11-01T00:00:00Z",
+    "fechaFinEvento": "2025-12-01T00:00:00Z",
+    "deporte": 1
+}
+
+### ID
+@id = {{createEvento.response.body.data.id}}
+
+### GET one evento
+http://localhost:3000/api/eventos/{{id}}
+
+### PUT a evento
+PUT http://localhost:3000/api/eventos/{{id}}
+Content-Type: application/json
+
+{
+    "nombre": "Mundial FIFA 2026",
+    "esPublico": true,
+    "cantEquiposMax": 32,
+    "contraseña": "1234",
+    "fechaInicioInscripcion": "2025-10-01T00:00:00Z",
+    "fechaFinInscripcion": "2025-10-15T00:00:00Z",
+    "fechaInicioEvento": "2025-11-01T00:00:00Z",
+    "fechaFinEvento": "2025-12-01T00:00:00Z",
+    "deporte": 1
+}
+
+### POST a evento
+POST http://localhost:3000/api/eventos
+Content-Type: application/json
+
+{
+    "nombre": "Torneo nacional de Basquet",
+    "esPublico": true,
+    "cantEquiposMax": 16,
+    "fechaInicioInscripcion": "2025-10-01T00:00:00Z",
+    "fechaFinInscripcion": "2025-10-15T00:00:00Z",
+    "deporte": 3
+}
+
+### POST a evento
+# @name createEventoToDelete
+POST http://localhost:3000/api/eventos
+Content-Type: application/json
+
+{
+    "nombre": "Tenis",
+    "esPublico": true,
+    "cantEquiposMax": 2,
+    "contraseña": "1234",
+    "fechaInicioInscripcion": "2025-10-01T00:00:00Z",
+    "fechaFinInscripcion": "2025-10-15T00:00:00Z",
+    "fechaInicioEvento": "2025-11-01T00:00:00Z",
+    "fechaFinEvento": "2025-12-01T00:00:00Z",
+    "deporte": 3
+}
+### DELETE a evento
+@idToDelete = {{createEventoToDelete.response.body.data.id}}
+DELETE http://localhost:3000/api/eventos/{{idToDelete}}
