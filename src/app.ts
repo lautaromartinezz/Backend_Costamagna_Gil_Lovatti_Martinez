@@ -6,6 +6,8 @@ import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { noticiaRouter } from './noticia/noticia.routes.js';
 import { eventoRouter } from './evento/evento.routers.js';
+import { partidoRouter } from './evento/partido.routers.js';
+
 const app = express();
 app.use(express.json());
 
@@ -19,6 +21,8 @@ app.use('/api/establecimientos', establecimientoRouter);
 app.use('/api/noticias', noticiaRouter);
 
 app.use('/api/eventos', eventoRouter);
+
+app.use('/api/partidos', partidoRouter);
 
 app.use((_, res) => {
   res.status(404).send({ message: 'Resource not found' });

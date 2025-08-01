@@ -1,0 +1,76 @@
+### GET all partidos
+http://localhost:3000/api/partidos
+
+
+### POST a partido
+# @name createPartido
+POST http://localhost:3000/api/partidos
+Content-Type: application/json
+
+{
+    "fecha": "2025-11-15",
+    "hora": "15:00",
+    "juez": "Juan Perez",
+    "resultado": "2-1",
+    "equipoLocal": "1",
+    "equipoVisitante": "2",
+    "mpv": "Jugador A",
+    "maxAnotador": "Jugador B",
+    "evento": 1,
+    "establecimiento": 1
+}
+
+### ID
+@id = {{createPartido.response.body.data.id}}
+
+### GET one partido
+http://localhost:3000/api/partidos/{{id}}
+
+### PUT a partido
+PUT http://localhost:3000/api/partidos/{{id}}
+Content-Type: application/json
+
+{
+    "fecha": "2025-11-16",
+    "hora": "16:00",
+    "juez": "Carlos Gomez",
+    "resultado": "3-2",
+    "equipoLocal": "1",
+    "equipoVisitante": "2",
+    "mpv": "Jugador C",
+    "maxAnotador": "Jugador D",
+    "evento": 1,
+    "establecimiento": 1
+}
+
+### POST a partido
+POST http://localhost:3000/api/partidos
+Content-Type: application/json
+
+{
+    "fecha": "2025-11-20",
+    "hora": "18:00",
+    "juez": "Maria Lopez",
+    "equipoLocal": "3",
+    "equipoVisitante": "4",
+    "evento": 1,
+    "establecimiento": 1
+}
+
+### POST a partido
+# @name createPartidoToDelete
+POST http://localhost:3000/api/partidos
+Content-Type: application/json
+
+{
+    "fecha": "2025-11-25",
+    "hora": "20:00",
+    "juez": "Pedro Martinez",
+    "equipoLocal": "5",
+    "equipoVisitante": "6",
+    "evento": 1,
+    "establecimiento": 1
+}
+### DELETE a partido
+@idToDelete = {{createPartidoToDelete.response.body.data.id}}
+DELETE http://localhost:3000/api/partidos/{{idToDelete}}

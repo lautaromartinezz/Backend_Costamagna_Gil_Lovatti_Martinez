@@ -31,7 +31,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
  try{
 const id = Number.parseInt(req.params.id)
-const establecimiento = await em.findOneOrFail(Establecimiento, {id})
+const establecimiento = await em.findOneOrFail(Establecimiento, {id}, {populate: ['partidos']})
 res.status(200).json({ message: 'Establecimiento encontrado', data: establecimiento })  
  }catch (error: any) {
     res.status(500).json({ message: 'Establecimiento no encontrado'})

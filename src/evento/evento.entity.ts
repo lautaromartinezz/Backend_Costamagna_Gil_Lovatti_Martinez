@@ -1,6 +1,8 @@
-import { Entity, ManyToOne, OneToMany, Property, Rel } from "@mikro-orm/core";
+import { Entity, ManyToOne, OneToMany, Property, Rel, Collection, Cascade } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Deporte } from "../deporte/deporte.entity.js";
+import { Partido } from "./partido.entity.js";
+
 
 @Entity()
 export class Evento extends BaseEntity {
@@ -23,4 +25,10 @@ export class Evento extends BaseEntity {
 
   @ManyToOne(() => Deporte, { nullable: true })
   deporte!: Rel<Deporte>;
+
+  @OneToMany(() => Partido, (partido) => partido.evento, {
+    nullable: true,
+    cascade: [Cascade.ALL],
+  })
+  partidos = new Collection<Partido>(this);
 }
