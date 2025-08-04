@@ -1,0 +1,57 @@
+### obtener todos los usuarios
+GET http://localhost:3000/api/usuarios
+
+### crear un nuevo usuario
+# @name createJosep
+POST http://localhost:3000/api/usuarios
+Content-Type: application/json
+
+{
+  "nombre" : "Jose",
+  "apellido" : "Perez",
+  "usuario" : "josep",
+  "contraseña" : "123456",
+  "email" : "jose@example.com",
+  "id" : 1,
+  "esAdmin" : false,
+  "fechaNacimiento" : "1990-01-01"
+}
+
+### ID
+@id = {{createJosep.response.body.data.id}}
+
+### obtener un usuario
+GET http://localhost:3000/api/usuarios/{{id}}
+
+### modificar un usuario (PUT - recurso completo e idempotente)
+PUT http://localhost:3000/api/usuarios/{{id}}
+Content-Type: application/json
+
+{
+  "nombre" : "Maria",
+  "apellido" : "Perez",
+  "usuario" : "mariap",
+  "contraseña" : "123456",
+  "email" : "maria@example.com",
+  "id" : 1,
+  "esAdmin" : false,
+  "fechaNacimiento" : "1990-01-01"
+}
+
+### modificar un usuario (PATCH - recurso parcial)
+PATCH http://localhost:3000/api/usuarios/{{id}}
+Content-Type: application/json
+
+{
+  "nombre" : "Mario",
+  "apellido" : "Ortega",
+  "usuario" : "marioo",
+  "contraseña" : "123456",
+  "email" : "mario@example.com",
+  "id" : 1,
+  "esAdmin" : false,
+  "fechaNacimiento" : "2000-01-01"
+}
+
+### borrar un usuario
+DELETE http://localhost:3000/api/usuarios/{{id}}

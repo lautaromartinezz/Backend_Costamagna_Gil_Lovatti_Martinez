@@ -1,0 +1,48 @@
+### obtener todos los equipos
+GET http://localhost:3000/api/equipos
+
+### crear un nuevo equipo
+# @name createRealMadrid  
+POST http://localhost:3000/api/equipos
+Content-Type: application/json
+
+{
+  "nombre" : "Real Madrid",
+  "capitan" : "Daniel Carvajal",
+  "puntos" : 999,
+  "esPublico": true,
+  "contraseña": "1234",
+}
+
+### ID
+@id = {{createRealMadrid.response.body.data.id}}
+
+### obtener un equipo
+GET http://localhost:3000/api/equipos/{{id}}
+
+### modificar un equipo (PUT - recurso completo e idempotente)
+PUT http://localhost:3000/api/equipos/{{id}}
+Content-Type: application/json
+
+{
+  "nombre":"Futbol Club Barcelona",
+  "capitan":"Marc Andre ter Stegen",
+  "puntos": 0,
+  "esPublico": true,
+  "contraseña": "1234"
+}
+
+### modificar un equipo (PATCH - recurso parcial)
+PATCH http://localhost:3000/api/equipos/{{id}}
+Content-Type: application/json
+
+{
+  "nombre" : "Real Madrid Castilla",
+  "capitan" : "Sergio Aguza",
+  "puntos" : 500,
+  "esPublico": false,
+  "contraseña": "1234"
+}
+
+### borrar un equipo
+DELETE http://localhost:3000/api/equipos/{{id}}
