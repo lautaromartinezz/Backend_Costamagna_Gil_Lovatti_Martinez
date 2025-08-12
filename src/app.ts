@@ -7,6 +7,8 @@ import { RequestContext } from '@mikro-orm/core';
 import { noticiaRouter } from './noticia/noticia.routes.js';
 import { eventoRouter } from './evento/evento.routers.js';
 import { partidoRouter } from './evento/partido.routers.js';
+import { equipoRouter } from './equipo/equipo.routes.js';
+import { usuarioRouter } from './usuario/usuario.routes.js';
 
 const app = express();
 app.use(express.json());
@@ -23,6 +25,11 @@ app.use('/api/noticias', noticiaRouter);
 app.use('/api/eventos', eventoRouter);
 
 app.use('/api/partidos', partidoRouter);
+
+app.use('/api/equipos', equipoRouter);
+
+app.use('/api/usuarios', usuarioRouter);
+
 
 app.use((_, res) => {
   res.status(404).send({ message: 'Resource not found' });
