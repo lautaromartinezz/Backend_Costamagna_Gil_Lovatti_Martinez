@@ -4,9 +4,10 @@ import {
   Cascade,
   OneToMany,
   Collection,
+  ManyToMany,
 } from '@mikro-orm/core';
 import { BaseEntity } from '../shared/db/baseEntity.entity.js';
-
+import { Equipo } from '../equipo/equipo.entity.js';
 @Entity()
 export class Usuario extends BaseEntity {
   @Property({ nullable: false })
@@ -26,4 +27,10 @@ export class Usuario extends BaseEntity {
 
   @Property({ nullable: true })
   esAdmin!: boolean;
+
+  @Property({ nullable: true })
+  fechaNacimiento!: Date;
+
+  @ManyToMany(() => Equipo, (equipo) => equipo.miembros)
+  equipos = new Collection<Equipo>(this);
 }

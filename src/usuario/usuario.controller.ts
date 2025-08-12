@@ -1,7 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { Usuario } from './usuario.entity.js';
-import { Participante } from './participante.entity.js';
-import { Administrador } from './administrador.entity.js';
 import { orm } from '../shared/db/orm.js';
 
 const em = orm.em;
@@ -29,12 +27,10 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
 async function findAll(req: Request, res: Response) {
   try {
     const usuarios = await em.find(Usuario, {});
-    res
-      .status(200)
-      .json({
-        message: 'Usuarios encontrados satisfactoriamente',
-        data: usuarios,
-      });
+    res.status(200).json({
+      message: 'Usuarios encontrados satisfactoriamente',
+      data: usuarios,
+    });
   } catch (error: any) {
     res.status(500).json({ message: 'Error al recuperar los usuarios' });
   }
@@ -53,11 +49,7 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   let usuario;
   try {
-    if (req.body.sanitizedInput.esAdmin) {
-      usuario = em.create(Administrador, req.body.sanitizedInput);
-    } else {
-      usuario = em.create(Participante, req.body.sanitizedInput);
-    }
+    usuario = em.create(Usuario, req.body.sanitizedInput);
     await em.flush();
     res.status(201).json({ message: 'Usuario creado', data: usuario });
   } catch (error: any) {

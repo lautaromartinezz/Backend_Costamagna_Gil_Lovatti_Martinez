@@ -8,7 +8,7 @@ import {
   Rel,
 } from '@mikro-orm/core';
 import { BaseEntity } from '../shared/db/baseEntity.entity.js';
-import { Participante } from '../usuario/participante.entity.js';
+import { Usuario } from '../usuario/usuario.entity.js';
 import { Evento } from '../evento/evento.entity.js';
 
 @Entity()
@@ -28,8 +28,8 @@ export class Equipo extends BaseEntity {
   @Property({ nullable: false })
   contraseña!: string;
 
-  @ManyToMany(() => Participante)
-  miembros = new Collection<Participante>(this);
+  @ManyToMany(() => Usuario)
+  miembros = new Collection<Usuario>(this);
 
   @ManyToOne(() => Evento, { nullable: false })
   evento!: Rel<Evento>;
