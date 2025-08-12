@@ -30,6 +30,7 @@ export class Equipo extends BaseEntity {
 
   @ManyToMany(() => Participante)
   miembros = new Collection<Participante>(this);
-  @ManyToOne(() => Evento)
+
+  @ManyToOne(() => Evento, { nullable: false })
   evento!: Rel<Evento>;
 }

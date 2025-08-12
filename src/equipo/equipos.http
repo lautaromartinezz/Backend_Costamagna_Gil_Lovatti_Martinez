@@ -2,20 +2,23 @@
 GET http://localhost:3000/api/equipos
 
 ### crear un nuevo equipo
-# @name createRealMadrid  
+# @name createEquipo
 POST http://localhost:3000/api/equipos
 Content-Type: application/json
 
 {
   "nombre" : "Real Madrid",
-  "capitan" : "Daniel Carvajal",
+  "nombreCapitan" : "Daniel Carvajal",
   "puntos" : 999,
   "esPublico": true,
-  "contraseña": "1234"
+  "contraseña": "1234",
+  "evento": 1
+
+  
 }
 
 ### ID
-@id = {{createRealMadrid.response.body.data.id}}
+@id = {{createEquipo.response.body.data.id}}
 
 ### obtener un equipo
 GET http://localhost:3000/api/equipos/{{id}}

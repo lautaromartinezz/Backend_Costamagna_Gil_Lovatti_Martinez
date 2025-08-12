@@ -5,14 +5,14 @@ import {
   ManyToMany,
   Collection,
 } from '@mikro-orm/core';
-import {Usuario} from './usuario.entity.js';
+import { Usuario } from './usuario.entity.js';
 import { Equipo } from '../equipo/equipo.entity.js';
 
 @Entity()
 export class Participante extends Usuario {
-  @Property({ nullable: false })
+  @Property({ nullable: true })
   fechaNacimiento!: Date;
 
-  @ManyToMany(() => Equipo, equipo => equipo.miembros)
+  @ManyToMany(() => Equipo, (equipo) => equipo.miembros)
   equipos = new Collection<Equipo>(this);
 }

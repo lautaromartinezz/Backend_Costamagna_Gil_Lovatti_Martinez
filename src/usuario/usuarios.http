@@ -12,7 +12,7 @@ Content-Type: application/json
   "usuario" : "josep",
   "contraseña" : "123456",
   "email" : "jose@example.com",
-  "id" : 1,
+
   "esAdmin" : false,
   "fechaNacimiento" : "1990-01-01"
 }
