@@ -11,7 +11,7 @@ Content-Type: application/json
   "capitan" : "Daniel Carvajal",
   "puntos" : 999,
   "esPublico": true,
-  "contraseña": "1234",
+  "contraseña": "1234"
 }
 
 ### ID

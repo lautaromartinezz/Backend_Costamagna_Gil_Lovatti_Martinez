@@ -24,7 +24,7 @@ export class Evento extends BaseEntity {
   fechaFinEvento ?: Date
 
   @OneToMany(() => Equipo, (equipo) => equipo.evento, { nullable: true, cascade: [Cascade.ALL] })
-  equipos = new Collection<Equipo>(this);
+  equipos = new Collection<Rel<Equipo>>(this);
 
   @ManyToOne(() => Deporte, { nullable: true })
   deporte!: Rel<Deporte>;
