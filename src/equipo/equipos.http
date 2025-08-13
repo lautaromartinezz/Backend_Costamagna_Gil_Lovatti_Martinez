@@ -13,7 +13,7 @@ Content-Type: application/json
   "esPublico": true,
   "contraseña": "1234",
   "evento": 1,
-  "miembros" : [1, 2]
+  "miembros" : [1]
   
 
   

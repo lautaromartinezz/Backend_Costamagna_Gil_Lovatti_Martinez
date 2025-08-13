@@ -14,8 +14,7 @@ Content-Type: application/json
   "email" : "jose@example.com",
 
   "esAdmin" : false,
-  "fechaNacimiento" : "1990-01-01",
-  "equipos": [1, 2]
+  "fechaNacimiento" : "1990-01-01"
 }
 
 ### ID

@@ -25,7 +25,7 @@ function sanitizeEquipoInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const equipo = await em.find(Equipo, {}, { populate: ['miembros'] });
+    const equipo = await em.find(Equipo, {}, { populate: ['miembros','evento'] });
     res.status(200).json({
       message: 'Equipos encontrados satisfactoriamente',
       data: equipo,

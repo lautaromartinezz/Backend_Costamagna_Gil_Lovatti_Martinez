@@ -20,7 +20,7 @@ export class Partido extends BaseEntity {
   @Property({ nullable: true })
   equipoVisitante?: string
   @Property({ nullable: true })
-  mpv?: string // jugador más valioso
+  mvp?: string // jugador más valioso
   @Property({ nullable: true })
   maxAnotador?: string
 

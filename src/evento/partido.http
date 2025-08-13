@@ -14,7 +14,7 @@ Content-Type: application/json
     "resultado": "2-1",
     "equipoLocal": "1",
     "equipoVisitante": "2",
-    "mpv": "Jugador A",
+    "mvp": "Jugador A",
     "maxAnotador": "Jugador B",
     "evento": 1,
     "establecimiento": 1
@@ -37,7 +37,7 @@ Content-Type: application/json
     "resultado": "3-2",
     "equipoLocal": "1",
     "equipoVisitante": "2",
-    "mpv": "Jugador C",
+    "mvp": "Jugador C",
     "maxAnotador": "Jugador D",
     "evento": 1,
     "establecimiento": 1

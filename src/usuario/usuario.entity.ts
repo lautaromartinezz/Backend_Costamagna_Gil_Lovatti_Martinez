@@ -31,6 +31,6 @@ export class Usuario extends BaseEntity {
   @Property({ nullable: true })
   fechaNacimiento!: Date;
 
-  @ManyToMany(() => Equipo, (equipo) => equipo.miembros)
+  @ManyToMany(() => Equipo, (equipo) => equipo.miembros,{ nullable: true })
   equipos = new Collection<Equipo>(this);
 }
