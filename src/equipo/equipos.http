@@ -12,7 +12,9 @@ Content-Type: application/json
   "puntos" : 999,
   "esPublico": true,
   "contraseña": "1234",
-  "evento": 1
+  "evento": 1,
+  "miembros" : [1, 2]
+  
 
   
 }

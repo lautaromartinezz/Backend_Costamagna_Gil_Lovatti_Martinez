@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Usuario } from './usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
-
+import { Equipo } from '../equipo/equipo.entity.js';
 const em = orm.em;
 
 function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
@@ -12,6 +12,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
     contraseña: req.body.contraseña,
     email: req.body.email,
     id: req.body.id,
+    equipos: req.body.equipos ? req.body.equipos : [],
     esAdmin: req.body.esAdmin !== undefined ? req.body.esAdmin : false,
     fechaNacimiento:
       req.body.fechaNacimiento !== undefined ? req.body.fechaNacimiento : null,
@@ -26,7 +27,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const usuarios = await em.find(Usuario, {});
+    const usuarios = await em.find(Usuario, {}, { populate: ['equipos'] });
     res.status(200).json({
       message: 'Usuarios encontrados satisfactoriamente',
       data: usuarios,

@@ -13,6 +13,7 @@ function sanitizeEquipoInput(req: Request, res: Response, next: NextFunction) {
     contraseña: req.body.contraseña,
     id: req.body.id,
     evento: req.body.evento,
+    miembros: req.body.miembros ? req.body.miembros : [],
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
@@ -24,7 +25,7 @@ function sanitizeEquipoInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const equipo = await em.find(Equipo, {});
+    const equipo = await em.find(Equipo, {}, { populate: ['miembros'] });
     res.status(200).json({
       message: 'Equipos encontrados satisfactoriamente',
       data: equipo,
@@ -37,7 +38,11 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const equipo = await em.findOneOrFail(Equipo, { id });
+    const equipo = await em.findOneOrFail(
+      Equipo,
+      { id },
+      { populate: ['miembros'] }
+    );
     res.status(200).json({ message: 'Equipo encontrado', data: equipo });
   } catch (error: any) {
     res.status(500).json({ message: 'Equipo no encontrado' });
