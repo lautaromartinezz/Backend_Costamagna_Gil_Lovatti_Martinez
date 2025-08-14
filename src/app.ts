@@ -9,6 +9,7 @@ import { eventoRouter } from './evento/evento.routers.js';
 import { partidoRouter } from './evento/partido.routers.js';
 import { equipoRouter } from './equipo/equipo.routes.js';
 import { usuarioRouter } from './usuario/usuario.routes.js';
+import { participacionRouter } from './participacion/participacion.routes.js';
 
 const app = express();
 app.use(express.json());
@@ -30,6 +31,7 @@ app.use('/api/equipos', equipoRouter);
 
 app.use('/api/usuarios', usuarioRouter);
 
+app.use('/api/participacions', participacionRouter);
 
 app.use((_, res) => {
   res.status(404).send({ message: 'Resource not found' });

@@ -9,6 +9,7 @@ import {
 import { BaseEntity } from '../shared/db/baseEntity.entity.js';
 import { Equipo } from '../equipo/equipo.entity.js';
 import { Partido } from '../evento/partido.entity.js';
+import { Participacion } from '../participacion/participacion.entity.js';
 @Entity()
 export class Usuario extends BaseEntity {
   @Property({ nullable: false })
@@ -32,18 +33,21 @@ export class Usuario extends BaseEntity {
   @Property({ nullable: true })
   fechaNacimiento!: Date;
 
-  @ManyToMany(() => Equipo, (equipo) => equipo.miembros,{ nullable: true })
+  @ManyToMany(() => Equipo, (equipo) => equipo.miembros, { nullable: true })
   equipos = new Collection<Equipo>(this);
 
-  @OneToMany(() => Partido,(partido) => partido.mvp, {
+  @OneToMany(() => Partido, (partido) => partido.mvp, {
     nullable: true,
     cascade: [Cascade.ALL],
   })
-  mvps?= new Collection<Partido>(this);
-  @OneToMany(() => Partido,(partido) => partido.maxAnotador, {
+  mvps? = new Collection<Partido>(this);
+  @OneToMany(() => Partido, (partido) => partido.maxAnotador, {
     nullable: true,
     cascade: [Cascade.ALL],
   })
-  maxAnotador?= new Collection<Partido>(this);
-
+  maxAnotador? = new Collection<Partido>(this);
+  @OneToMany(() => Participacion, (participacion) => participacion.usuario, {
+    cascade: [Cascade.ALL],
+  })
+  participations? = new Collection<Participacion>(this);
 }

@@ -17,6 +17,7 @@ function sanitizePartidoInput(req: Request, res: Response, next: NextFunction) {
     evento: req.body.evento,
     establecimiento: req.body.establecimiento,
     id: req.body.id,
+    participations: req.body.participations,
   };
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -29,7 +30,22 @@ function sanitizePartidoInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const partidos = await em.find(Partido, {}, {populate: ['evento','evento.deporte' ,'establecimiento','equipoLocal', 'equipoVisitante', 'mvp', 'maxAnotador']});
+    const partidos = await em.find(
+      Partido,
+      {},
+      {
+        populate: [
+          'evento',
+          'evento.deporte',
+          'establecimiento',
+          'equipoLocal',
+          'equipoVisitante',
+          'mvp',
+          'maxAnotador',
+          'participations',
+        ],
+      }
+    );
     res
       .status(200)
       .json({ message: 'Partidos retrieved successfully', data: partidos });
@@ -43,7 +59,22 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const partido = await em.findOneOrFail(Partido, { id }, {populate: ['evento','evento.deporte' ,'establecimiento','equipoLocal', 'equipoVisitante', 'mvp', 'maxAnotador']});
+    const partido = await em.findOneOrFail(
+      Partido,
+      { id },
+      {
+        populate: [
+          'evento',
+          'evento.deporte',
+          'establecimiento',
+          'equipoLocal',
+          'equipoVisitante',
+          'mvp',
+          'maxAnotador',
+          'participations',
+        ],
+      }
+    );
     res.status(200).json({ message: 'found partido', data: partido });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -76,7 +107,7 @@ async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const partido = em.getReference(Partido, id);
-    res.status(200).json({ message: 'partido deleted', data: partido })
+    res.status(200).json({ message: 'partido deleted', data: partido });
     await em.removeAndFlush(partido);
   } catch (error: any) {
     res.status(500).json({ message: error.message });

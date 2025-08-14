@@ -14,10 +14,11 @@ Content-Type: application/json
     "resultado": "2-1",
     "equipoLocal": 2,
     "equipoVisitante": 2,
-    "mvp": "Jugador A",
-    "maxAnotador": "Jugador B",
+    "mvp": 1,
+    "maxAnotador": 1,
     "evento": 1,
-    "establecimiento": 1
+    "establecimiento": 1,
+    "participations": [2, 3]
 }
 
 ### ID

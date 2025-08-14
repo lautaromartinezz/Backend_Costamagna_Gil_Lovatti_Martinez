@@ -1,0 +1,59 @@
+### GET all participacions
+http://localhost:3000/api/participacions
+
+
+### POST a particiacion
+# @name createparticipacion
+POST http://localhost:3000/api/participacions
+Content-Type: application/json
+
+{
+  "puntos": 20,
+  "minutosjugados": 30,
+  "faltas": 2}
+
+### ID
+@id = {{createparticipacion.response.body.data.id}}
+
+### GET one particiacion
+http://localhost:3000/api/participacions/{{id}}
+
+### PUT a particiacion
+PUT http://localhost:3000/api/participacions/{{id}}
+Content-Type: application/json
+
+{
+  "puntos": 25,
+  "minutosjugados": 35,
+  "faltas": 3,
+  "partido": 1, // ID del partido al que pertenece la participación
+  "usuario": 2 // ID del usuario que realiza la participación
+}
+
+### POST a particiacion
+POST http://localhost:3000/api/participacions
+Content-Type: application/json
+
+{
+  "puntos": 15,
+  "minutosjugados": 20,
+
+}
+
+### POST a particiacion
+# @name createParticipacionToDelete
+POST http://localhost:3000/api/participacions
+Content-Type: application/json
+
+{
+  "puntos": 10,
+  "minutosjugados": 15,
+  "faltas": 1,
+  "partido": 1, // ID del partido al que pertenece la participación
+  "usuario": 2 // ID del usuario que realiza la participación
+}
+
+### DELETE a particiacion
+@idToDelete = {{createParticipacionToDelete.response.body.data.id}}
+DELETE http://localhost:3000/api/participacions/{{idToDelete}}
+

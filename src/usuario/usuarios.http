@@ -7,13 +7,14 @@ POST http://localhost:3000/api/usuarios
 Content-Type: application/json
 
 {
-  "nombre" : "Jose",
+  "nombre" : "juan",
   "apellido" : "Perez",
-  "usuario" : "josep",
+  "usuario" : "mariap",
   "contraseña" : "123456",
-  "email" : "jose@example.com",
+  "email" : "maria@example.com",
   "esAdmin" : false,
-  "fechaNacimiento" : "1990-01-01"
+  "fechaNacimiento" : "1990-03-01",
+  "participations": [3]
 }
 
 ### ID

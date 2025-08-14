@@ -14,6 +14,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
     id: req.body.id,
     equipos: req.body.equipos ? req.body.equipos : [],
     esAdmin: req.body.esAdmin !== undefined ? req.body.esAdmin : false,
+    participations: req.body.participations,
     fechaNacimiento:
       req.body.fechaNacimiento !== undefined ? req.body.fechaNacimiento : null,
   };
@@ -27,7 +28,11 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const usuarios = await em.find(Usuario, {}, { populate: ['equipos','mvps','maxAnotador'] });
+    const usuarios = await em.find(
+      Usuario,
+      {},
+      { populate: ['equipos', 'mvps', 'maxAnotador', 'participations'] }
+    );
     res.status(200).json({
       message: 'Usuarios encontrados satisfactoriamente',
       data: usuarios,
@@ -40,7 +45,11 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const usuario = await em.findOneOrFail(Usuario, { id },{ populate: ['equipos','mvps','maxAnotador'] });
+    const usuario = await em.findOneOrFail(
+      Usuario,
+      { id },
+      { populate: ['equipos', 'mvps', 'maxAnotador', 'participations'] }
+    );
     res.status(200).json({ message: 'Usuario encontrado', data: usuario });
   } catch (error: any) {
     res.status(500).json({ message: 'Usuario no encontrado' });
