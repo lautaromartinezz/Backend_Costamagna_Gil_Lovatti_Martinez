@@ -16,6 +16,8 @@ function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
     fechaInicioEvento: req.body.fechaInicioEvento,
     fechaFinEvento: req.body.fechaFinEvento,
     deporte: req.body.deporte,
+    equipos: req.body.equipos ? req.body.equipos : [],
+    partidos: req.body.partidos ? req.body.partidos : [],
   };
   //more checks here
 
@@ -29,7 +31,7 @@ function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const eventos = await em.find(Evento, {}, {populate: ['deporte']});
+    const eventos = await em.find(Evento, {}, {populate: ['deporte','equipos', 'partidos']});
     res
       .status(200)
       .json({ message: 'Eventos retrieved successfully', data: eventos });
@@ -43,7 +45,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const evento = await em.findOneOrFail(Evento, { id }, {populate: ['deporte']});
+    const evento = await em.findOneOrFail(Evento, { id }, {populate: ['deporte','equipos', 'partidos']});
     res.status(200).json({ message: 'found evento', data: evento });
   } catch (error: any) {
     res.status(500).json({ message: error.message });

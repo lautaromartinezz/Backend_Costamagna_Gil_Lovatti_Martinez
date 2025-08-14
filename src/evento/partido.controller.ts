@@ -12,7 +12,7 @@ function sanitizePartidoInput(req: Request, res: Response, next: NextFunction) {
     resultado: req.body.resultado,
     equipoLocal: req.body.equipoLocal,
     equipoVisitante: req.body.equipoVisitante,
-    mpv: req.body.mpv,
+    mvp: req.body.mvp,
     maxAnotador: req.body.maxAnotador,
     evento: req.body.evento,
     establecimiento: req.body.establecimiento,
@@ -29,7 +29,7 @@ function sanitizePartidoInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const partidos = await em.find(Partido, {}, {populate: ['evento', 'establecimiento']});
+    const partidos = await em.find(Partido, {}, {populate: ['evento','evento.deporte' ,'establecimiento','equipoLocal', 'equipoVisitante', 'mvp', 'maxAnotador']});
     res
       .status(200)
       .json({ message: 'Partidos retrieved successfully', data: partidos });
@@ -43,7 +43,7 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const partido = await em.findOneOrFail(Partido, { id }, {populate: ['evento', 'establecimiento']});
+    const partido = await em.findOneOrFail(Partido, { id }, {populate: ['evento','evento.deporte' ,'establecimiento','equipoLocal', 'equipoVisitante', 'mvp', 'maxAnotador']});
     res.status(200).json({ message: 'found partido', data: partido });
   } catch (error: any) {
     res.status(500).json({ message: error.message });

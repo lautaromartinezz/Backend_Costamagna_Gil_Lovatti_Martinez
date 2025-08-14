@@ -1,7 +1,9 @@
-import { Entity, ManyToOne, Property, Rel } from "@mikro-orm/core";
+import { Cascade, Entity, ManyToOne, OneToMany, Property, Rel } from "@mikro-orm/core";
 import { BaseEntity } from "../shared/db/baseEntity.entity.js";
 import { Evento } from "./evento.entity.js";
 import { Establecimiento } from "../establecimiento/establecimiento.entity.js";
+import { Equipo } from "../equipo/equipo.entity.js";
+import { Usuario } from "../usuario/usuario.entity.js";
 
 @Entity()
 export class Partido extends BaseEntity {
@@ -15,14 +17,16 @@ export class Partido extends BaseEntity {
   resultado?: string
 
   //cambiar la relacion cuando se implemente la entidad Equipo y Participante
-  @Property({ nullable: true })
-  equipoLocal?: string
-  @Property({ nullable: true })
-  equipoVisitante?: string
-  @Property({ nullable: true })
-  mvp?: string // jugador más valioso
-  @Property({ nullable: true })
-  maxAnotador?: string
+  @ManyToOne(() => Equipo, { nullable: false })
+  equipoLocal!: Rel<Equipo>;
+  @ManyToOne(() => Equipo, { nullable: false })
+  equipoVisitante!: Rel<Equipo>;
+
+  @ManyToOne(() => Usuario, { nullable: true })
+  mvp?: Rel<Usuario> // jugador más valioso
+
+  @ManyToOne(() => Usuario, { nullable: true })
+  maxAnotador?: Rel<Usuario>
 
   @ManyToOne(() => Evento, { nullable: false })
   evento!: Rel<Evento>;
