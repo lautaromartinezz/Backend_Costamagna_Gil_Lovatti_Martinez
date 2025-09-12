@@ -68,8 +68,10 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const noticia = em.getReference(Noticia, id);
-    await em.removeAndFlush(noticia);
+    const noticia = await em.findOneOrFail(Noticia, { id });
+    em.remove(noticia);
+    await em.flush();
+    res.status(200).json({ message: 'noticia deleted' });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

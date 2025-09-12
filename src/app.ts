@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import express from 'express';
+import cors from 'cors';
 import { deporteRouter } from './deporte/deporte.routes.js';
 import { establecimientoRouter } from './establecimiento/establecimiento.routes.js';
 import { orm, syncSchema } from './shared/db/orm.js';
@@ -13,6 +14,8 @@ import { participacionRouter } from './participacion/participacion.routes.js';
 
 const app = express();
 app.use(express.json());
+
+app.use(cors()); // 👈 Esto permite todas las conexiones (ideal para desarrollo)
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);

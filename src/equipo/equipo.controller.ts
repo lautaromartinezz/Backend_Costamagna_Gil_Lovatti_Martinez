@@ -25,7 +25,19 @@ function sanitizeEquipoInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const equipo = await em.find(Equipo, {}, { populate: ['miembros','evento','partidoVisitante','partidoLocal','evento.deporte'] });
+    const equipo = await em.find(
+      Equipo,
+      {},
+      {
+        populate: [
+          'miembros',
+          'evento',
+          'partidoVisitante',
+          'partidoLocal',
+          'evento.deporte',
+        ],
+      }
+    );
     res.status(200).json({
       message: 'Equipos encontrados satisfactoriamente',
       data: equipo,
@@ -41,7 +53,15 @@ async function findOne(req: Request, res: Response) {
     const equipo = await em.findOneOrFail(
       Equipo,
       { id },
-      { populate: ['miembros','evento','partidoVisitante','partidoLocal','evento.deporte'] }
+      {
+        populate: [
+          'miembros',
+          'evento',
+          'partidoVisitante',
+          'partidoLocal',
+          'evento.deporte',
+        ],
+      }
     );
     res.status(200).json({ message: 'Equipo encontrado', data: equipo });
   } catch (error: any) {

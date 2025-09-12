@@ -27,31 +27,10 @@ Content-Type: application/json
   "descripcion": "Un torneo emocionante con equipos de todo el país compitiendo por el campeonato."
 }
 
-### POST a noticia
-POST http://localhost:3000/api/noticias
-Content-Type: application/json
 
-{
-  "titulo": "Copa de tenis internacional",
-  "descripcion": "Un torneo de tenis con los mejores jugadores del mundo compitiendo por el título."
-}
-
-### POST a noticia
-# @name createNoticiaToDelete
-POST http://localhost:3000/api/noticias
-Content-Type: application/json
-
-{
-  "titulo": "Copa de rugby local",
-  "descripcion": "Un torneo de rugby con equipos locales compitiendo por el título."
-}
-
-### DELETE a noticia
-@idToDelete = {{createNoticiaToDelete.response.body.data.id}}
-DELETE http://localhost:3000/api/noticias/{{idToDelete}}
 
 ### PATCH a noticia
-PATCH http://localhost:3000/api/noticias/{{idToDelete}}
+PATCH http://localhost:3000/api/noticias/{{id}}
 Content-Type: application/json
 
 {
@@ -60,4 +39,4 @@ Content-Type: application/json
 }
 
 ### DELETE a noticia
-DELETE http://localhost:3000/api/noticias/{{idToDelete}}
+DELETE http://localhost:3000/api/noticias/{{id}}
