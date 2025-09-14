@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Usuario } from './usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
-import { Equipo } from '../equipo/equipo.entity.js';
 const em = orm.em;
 
 function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
@@ -93,4 +92,15 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeUsuarioInput, findAll, findOne, add, update, remove };
+async function loginUsuario(req: Request, res: Response) {
+  const { usuario, contraseña } = req.body;
+  const userRepo = em.getRepository(Usuario);
+  try {
+    const user = await userRepo.findOneOrFail({ usuario, contraseña });
+    res.json({ message: "Login exitoso", user });
+  } catch (error) {
+    res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+  }
+};
+
+export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario };

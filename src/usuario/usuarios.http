@@ -53,3 +53,12 @@ Content-Type: application/json
 
 ### borrar un usuario
 DELETE http://localhost:3000/api/usuarios/{{id}}
+
+### login de un usuario
+POST http://localhost:3000/api/usuarios/login
+Content-Type: application/json
+
+{
+  "usuario": "fran",
+  "contraseña": "1234"
+}
