@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { Usuario } from './usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
+import jsonwebtoken from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+
 const em = orm.em;
 
 function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
@@ -10,6 +13,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
     usuario: req.body.usuario,
     contraseña: req.body.contraseña,
     email: req.body.email,
+    role: req.body.role ? req.body.role : 'Usuario',
     id: req.body.id,
     equipos: req.body.equipos ? req.body.equipos : [],
     esAdmin: req.body.esAdmin !== undefined ? req.body.esAdmin : false,
@@ -59,6 +63,8 @@ async function add(req: Request, res: Response) {
   let usuario;
   try {
     usuario = em.create(Usuario, req.body.sanitizedInput);
+    const hashedPassword = await bcrypt.hash(usuario.contraseña, 8);
+    usuario.contraseña = hashedPassword;
     await em.flush();
     res.status(201).json({ message: 'Usuario creado', data: usuario });
   } catch (error: any) {
@@ -92,12 +98,36 @@ async function remove(req: Request, res: Response) {
   }
 }
 
+const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_para_dev'; // Lo ideal es usar process.env.JWT_SECRET, hay que setear la variable de entorno
+
 async function loginUsuario(req: Request, res: Response) {
   const { usuario, contraseña } = req.body;
   const userRepo = em.getRepository(Usuario);
   try {
-    const user = await userRepo.findOneOrFail({ usuario, contraseña });
-    res.json({ message: "Login exitoso", user });
+    const user = await userRepo.findOneOrFail({ usuario});
+    if (!user) {
+      res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      return;
+    }
+    const match = await bcrypt.compare(contraseña, user.contraseña);
+    if (!match) {
+      res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      return;
+    }
+    // Armamos el payload con los datos mínimos
+    const payload = {
+      id: user.id,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      usuario: user.usuario,
+      role: user.role
+    };
+
+    // Creamos el token
+    const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+
+    // Respondemos solo con el token y, si querés, el rol o id
+    res.json({ token, role: payload.role, id: payload.id, nombre: payload.nombre, apellido: payload.apellido, usuario: payload.usuario });
   } catch (error) {
     res.status(401).json({ message: "Usuario o contraseña incorrectos" });
   }

@@ -18,17 +18,17 @@ export class Usuario extends BaseEntity {
   @Property({ nullable: false })
   apellido!: string;
 
-  @Property({ nullable: false })
+  @Property({ nullable: false, unique: true })
   usuario!: string;
 
   @Property({ nullable: false })
   contraseña!: string;
 
-  @Property({ nullable: false })
+  @Property({ nullable: false, unique: true })
   email!: string;
 
-  @Property({ nullable: true })
-  esAdmin!: boolean;
+  @Property({ nullable: false })
+  role!: string;
 
   @Property({ nullable: true })
   fechaNacimiento!: Date;

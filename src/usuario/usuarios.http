@@ -12,7 +12,7 @@ Content-Type: application/json
   "usuario" : "mariap",
   "contraseña" : "123456",
   "email" : "maria@example.com",
-  "esAdmin" : false,
+  "role" : "Usuario",
   "fechaNacimiento" : "1990-03-01",
   "participations": [3]
 }
@@ -33,7 +33,7 @@ Content-Type: application/json
   "usuario" : "mariap",
   "contraseña" : "123456",
   "email" : "maria@example.com",
-  "esAdmin" : false,
+  "role" : "Usuario",
   "fechaNacimiento" : "1990-03-01"
 }
 
