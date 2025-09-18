@@ -6,6 +6,8 @@ import bcrypt from 'bcrypt';
 
 const em = orm.em;
 
+// El safe de las cookies hay que cambiarlo a true en produccion, esta en false para desarrollo
+
 function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     nombre: req.body.nombre,
@@ -16,7 +18,6 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
     role: req.body.role ? req.body.role : 'Usuario',
     id: req.body.id,
     equipos: req.body.equipos ? req.body.equipos : [],
-    esAdmin: req.body.esAdmin !== undefined ? req.body.esAdmin : false,
     participations: req.body.participations,
     fechaNacimiento:
       req.body.fechaNacimiento !== undefined ? req.body.fechaNacimiento : null,
@@ -101,7 +102,7 @@ async function remove(req: Request, res: Response) {
 const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_para_dev'; // Lo ideal es usar process.env.JWT_SECRET, hay que setear la variable de entorno
 
 async function loginUsuario(req: Request, res: Response) {
-  const { usuario, contraseña } = req.body;
+  const { usuario, contraseña, remember } = req.body;
   const userRepo = em.getRepository(Usuario);
   try {
     const user = await userRepo.findOneOrFail({ usuario});
@@ -123,14 +124,61 @@ async function loginUsuario(req: Request, res: Response) {
       role: user.role
     };
 
-    // Creamos el token
+    // Creamos los token
     const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+    if (remember) {
+      const recuerdame = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+      res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
+    }
 
-    // Respondemos solo con el token y, si querés, el rol o id
+    // Respondemos con el token y el payload
     res.json({ token, role: payload.role, id: payload.id, nombre: payload.nombre, apellido: payload.apellido, usuario: payload.usuario });
   } catch (error) {
     res.status(401).json({ message: "Usuario o contraseña incorrectos" });
   }
 };
 
-export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario };
+async function restaurarUsuario(req: Request, res: Response) {
+  const { recuerdame } = req.cookies;
+  if (!recuerdame) {
+    return res.status(401).json({ message: "No autorizado" });
+  }
+  try {
+    const decoded = jsonwebtoken.verify(recuerdame, JWT_SECRET);
+    if (
+    typeof decoded === 'object' &&
+    decoded !== null &&
+    'id' in decoded &&
+    'nombre' in decoded &&
+    'apellido' in decoded &&
+    'usuario' in decoded &&
+    'role' in decoded
+    ) {
+      const payload = {
+        id: decoded.id,
+        nombre: decoded.nombre,
+        apellido: decoded.apellido,
+        usuario: decoded.usuario,
+        role: decoded.role
+      };
+      const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+      res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
+      return res.json({ token, role: payload.role, id: payload.id, nombre: payload.nombre, apellido: payload.apellido, usuario: payload.usuario });
+    } else {
+      res.status(401).json({ message: "Token inválido" });
+    }
+  } catch {
+    res.status(401).json({ message: "Token inválido" });
+  }
+}
+
+function logoutUsuario(req: Request, res: Response) {
+  try {
+    res.clearCookie('recuerdame', { httpOnly: true, secure: false, sameSite: 'strict' });
+    res.status(200).json({ message: 'Logout exitoso' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al hacer logout' });
+  }
+}
+
+export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, restaurarUsuario, logoutUsuario };

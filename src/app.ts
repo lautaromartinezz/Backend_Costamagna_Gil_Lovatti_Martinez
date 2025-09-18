@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { deporteRouter } from './deporte/deporte.routes.js';
 import { establecimientoRouter } from './establecimiento/establecimiento.routes.js';
@@ -14,8 +15,12 @@ import { participacionRouter } from './participacion/participacion.routes.js';
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
-app.use(cors()); // 👈 Esto permite todas las conexiones (ideal para desarrollo)
+app.use(cors({
+  origin: 'http://localhost:5173', // o el origen de tu frontend
+  credentials: true
+})); // 👈 Esto permite todas las conexiones (ideal para desarrollo)
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
