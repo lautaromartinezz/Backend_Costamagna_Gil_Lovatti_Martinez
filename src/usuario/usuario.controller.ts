@@ -121,11 +121,12 @@ async function loginUsuario(req: Request, res: Response) {
       nombre: user.nombre,
       apellido: user.apellido,
       usuario: user.usuario,
-      role: user.role
+      role: user.role,
+      ip: req.ip
     };
 
     // Creamos los token
-    const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+    const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1s' });
     if (remember) {
       const recuerdame = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '7d' });
       res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
@@ -137,8 +138,7 @@ async function loginUsuario(req: Request, res: Response) {
     res.status(401).json({ message: "Usuario o contraseña incorrectos" });
   }
 };
-
-async function restaurarUsuario(req: Request, res: Response) {
+function restaurarUsuario(req: Request, res: Response) {
   const { recuerdame } = req.cookies;
   if (!recuerdame) {
     return res.status(401).json({ message: "No autorizado" });
@@ -147,6 +147,8 @@ async function restaurarUsuario(req: Request, res: Response) {
     const decoded = jsonwebtoken.verify(recuerdame, JWT_SECRET);
     if (
     typeof decoded === 'object' &&
+    'ip' in decoded &&
+    decoded.ip == req.ip && // Verificamos que la IP coincida
     decoded !== null &&
     'id' in decoded &&
     'nombre' in decoded &&
@@ -159,7 +161,8 @@ async function restaurarUsuario(req: Request, res: Response) {
         nombre: decoded.nombre,
         apellido: decoded.apellido,
         usuario: decoded.usuario,
-        role: decoded.role
+        role: decoded.role,
+        ip: req.ip
       };
       const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '15m' });
       res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
@@ -181,4 +184,4 @@ function logoutUsuario(req: Request, res: Response) {
   }
 }
 
-export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, restaurarUsuario, logoutUsuario };
+export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, logoutUsuario, restaurarUsuario };

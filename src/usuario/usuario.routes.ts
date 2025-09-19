@@ -14,7 +14,7 @@ usuarioRouter.post('/', sanitizeUsuarioInput, add) // registro
 usuarioRouter.post('/restaurar', asyncHandler(restaurarUsuario)) // restaurar usuario con cookie recuerdame
 usuarioRouter.post('/logout', logoutUsuario) // logout: borra la cookie recuerdame
 
-// Rutas protegidas
+// Rutas protegidas con authMiddleware
 usuarioRouter.get('/', authMiddleware, findAll)
 usuarioRouter.get('/:id', authMiddleware, findOne)
 usuarioRouter.put('/:id', authMiddleware, sanitizeUsuarioInput, update)
