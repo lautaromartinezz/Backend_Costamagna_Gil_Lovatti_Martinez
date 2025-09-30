@@ -18,6 +18,7 @@ function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
     deporte: req.body.deporte,
     equipos: req.body.equipos ? req.body.equipos : [],
     partidos: req.body.partidos ? req.body.partidos : [],
+    localidad: req.body.localidad,
   };
   //more checks here
 
@@ -31,7 +32,11 @@ function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const eventos = await em.find(Evento, {}, {populate: ['deporte','equipos', 'partidos']});
+    const eventos = await em.find(
+      Evento,
+      {},
+      { populate: ['deporte', 'equipos', 'partidos'] }
+    );
     res
       .status(200)
       .json({ message: 'Eventos retrieved successfully', data: eventos });
@@ -45,7 +50,11 @@ async function findAll(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const evento = await em.findOneOrFail(Evento, { id }, {populate: ['deporte','equipos', 'partidos']});
+    const evento = await em.findOneOrFail(
+      Evento,
+      { id },
+      { populate: ['deporte', 'equipos', 'partidos'] }
+    );
     res.status(200).json({ message: 'found evento', data: evento });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -78,7 +87,7 @@ async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const evento = em.getReference(Evento, id);
-    res.status(200).json({ message: 'evento deleted', data: evento })
+    res.status(200).json({ message: 'evento deleted', data: evento });
     await em.removeAndFlush(evento);
   } catch (error: any) {
     res.status(500).json({ message: error.message });

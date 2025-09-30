@@ -6,7 +6,7 @@ import { establecimientoRouter } from './establecimiento/establecimiento.routes.
 import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { noticiaRouter } from './noticia/noticia.routes.js';
-import { eventoRouter } from './evento/evento.routers.js';
+import { eventoRouter } from './evento/evento.routes.js';
 import { partidoRouter } from './evento/partido.routers.js';
 import { equipoRouter } from './equipo/equipo.routes.js';
 import { usuarioRouter } from './usuario/usuario.routes.js';

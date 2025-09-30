@@ -11,6 +11,7 @@ import { BaseEntity } from '../shared/db/baseEntity.entity.js';
 import { Deporte } from '../deporte/deporte.entity.js';
 import { Partido } from './partido.entity.js';
 import { Equipo } from '../equipo/equipo.entity.js';
+import { Localidad } from '../localidad/localidad.entity.js';
 
 @Entity()
 export class Evento extends BaseEntity {
@@ -45,4 +46,7 @@ export class Evento extends BaseEntity {
     cascade: [Cascade.ALL],
   })
   partidos = new Collection<Partido>(this);
+
+  @ManyToOne(() => Localidad, { nullable: false })
+  localidad!: Rel<Localidad>;
 }
