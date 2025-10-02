@@ -72,6 +72,7 @@ async function remove(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const deporte = em.getReference(Deporte, id);
     await em.removeAndFlush(deporte);
+    res.status(200).json({ message: 'deporte deleted' });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

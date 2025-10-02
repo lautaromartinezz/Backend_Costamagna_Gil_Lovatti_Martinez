@@ -126,7 +126,7 @@ async function loginUsuario(req: Request, res: Response) {
     };
 
     // Creamos los token
-    const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1s' });
+    const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
     if (remember) {
       const recuerdame = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '7d' });
       res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
@@ -164,7 +164,7 @@ function restaurarUsuario(req: Request, res: Response) {
         role: decoded.role,
         ip: req.ip
       };
-      const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+      const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
       res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
       return res.json({ token, role: payload.role, id: payload.id, nombre: payload.nombre, apellido: payload.apellido, usuario: payload.usuario });
     } else {
