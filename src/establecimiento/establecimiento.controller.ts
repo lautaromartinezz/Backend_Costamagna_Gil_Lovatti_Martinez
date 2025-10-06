@@ -96,4 +96,29 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeEstablecimientoInput, findAll, findOne, add, update, remove };
+async function findAllByEvento(req: Request, res: Response) {
+  try {
+    const eventoId = Number.parseInt(req.params.eventoId);
+    const establecimientos = await em.find(Establecimiento, {
+      evento: eventoId,
+    });
+    res.status(200).json({
+      message: 'Establecimientos encontrados satisfactoriamente',
+      data: establecimientos,
+    });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: 'Error al recuperar los establecimientos' });
+  }
+}
+
+export {
+  sanitizeEstablecimientoInput,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  findAllByEvento,
+};
