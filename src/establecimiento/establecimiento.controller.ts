@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Establecimiento } from './establecimiento.entity.js';
 import { orm } from '../shared/db/orm.js';
+import { Evento } from '../evento/evento.entity.js';
 
 const em = orm.em;
 
@@ -12,7 +13,7 @@ function sanitizeEstablecimientoInput(
   req.body.sanitizedInput = {
     nombre: req.body.nombre,
     direccion: req.body.direccion,
-    evento: req.body.evento,
+    eventoId: req.body.eventoId,
     id: req.body.id,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
