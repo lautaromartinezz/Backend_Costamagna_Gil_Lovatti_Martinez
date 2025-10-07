@@ -114,4 +114,28 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizePartidoInput, findAll, findOne, add, update, remove };
+async function findAllByEvento(req: Request, res: Response) {
+  try {
+    const eventoId = Number.parseInt(req.params.eventoId);
+    const partidos = await em.find(Partido, {
+      evento: eventoId,
+    });
+    res.status(200).json({
+      message: 'Partidos encontrados satisfactoriamente',
+      data: partidos,
+    });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: 'Error al recuperar los establecimientos' });
+  }
+}
+export {
+  sanitizePartidoInput,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  findAllByEvento,
+};

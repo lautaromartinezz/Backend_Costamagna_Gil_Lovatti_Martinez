@@ -1,12 +1,20 @@
-import { Router } from 'express'
-import { sanitizePartidoInput, findAll, findOne, add, update, remove } from './partido.controller.js'
+import { Router } from 'express';
+import {
+  sanitizePartidoInput,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  findAllByEvento,
+} from './partido.controller.js';
 
-export const partidoRouter = Router()
+export const partidoRouter = Router();
 
-partidoRouter.get('/', findAll)
-
-partidoRouter.get('/:id', findOne)
-partidoRouter.post('/', sanitizePartidoInput, add)
-partidoRouter.put('/:id', sanitizePartidoInput, update)
-partidoRouter.patch('/:id', sanitizePartidoInput, update)
-partidoRouter.delete('/:id', remove)
+partidoRouter.get('/', findAll);
+partidoRouter.get('/evento/:eventoId', findAllByEvento);
+partidoRouter.get('/:id', findOne);
+partidoRouter.post('/', sanitizePartidoInput, add);
+partidoRouter.put('/:id', sanitizePartidoInput, update);
+partidoRouter.patch('/:id', sanitizePartidoInput, update);
+partidoRouter.delete('/:id', remove);
