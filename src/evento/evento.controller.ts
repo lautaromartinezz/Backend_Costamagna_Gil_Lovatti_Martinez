@@ -7,6 +7,7 @@ const em = orm.em;
 function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     nombre: req.body.nombre,
+    descripcion: req.body.descripcion,
     esPublico: req.body.esPublico,
     id: req.body.id,
     contraseña: req.body.contraseña,
@@ -35,7 +36,15 @@ async function findAll(req: Request, res: Response) {
     const eventos = await em.find(
       Evento,
       {},
-      { populate: ['deporte', 'equipos', 'partidos'] }
+      {
+        populate: [
+          'deporte',
+          'equipos',
+          'equipos.miembros',
+          'partidos',
+          'localidad',
+        ],
+      }
     );
     res
       .status(200)
@@ -53,7 +62,15 @@ async function findOne(req: Request, res: Response) {
     const evento = await em.findOneOrFail(
       Evento,
       { id },
-      { populate: ['deporte', 'equipos', 'partidos'] }
+      {
+        populate: [
+          'deporte',
+          'equipos',
+          'equipos.miembros',
+          'partidos',
+          'localidad',
+        ],
+      }
     );
     res.status(200).json({ message: 'found evento', data: evento });
   } catch (error: any) {
@@ -63,9 +80,16 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const evento = em.create(Evento, req.body.sanitizedInput);
+    const userId = (req as any).user.id;
+    const sanitizedInput = req.body.sanitizedInput;
+
+    const evento = em.create(Evento, {
+      ...sanitizedInput,
+      creador: userId,
+    });
+
     await em.flush();
-    res.status(201).json({ message: 'evento created', data: evento });
+    res.status(201).json({ message: 'Evento creado', data: evento });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -74,10 +98,26 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const eventoToUpdate = await em.findOneOrFail(Evento, { id });
+    const userId = (req as any).user.id;
+
+    const eventoToUpdate = await em.findOneOrFail(
+      Evento,
+      { id },
+      { populate: ['creador'] }
+    );
+
+    if (eventoToUpdate.creador.id !== userId) {
+      return res
+        .status(403)
+        .json({ message: 'No tienes permiso para modificar este evento' });
+    }
+
     em.assign(eventoToUpdate, req.body.sanitizedInput);
     await em.flush();
-    res.status(200).json({ message: 'evento updated', data: eventoToUpdate });
+
+    res
+      .status(200)
+      .json({ message: 'Evento actualizado', data: eventoToUpdate });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -86,9 +126,22 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const evento = em.getReference(Evento, id);
-    res.status(200).json({ message: 'evento deleted', data: evento });
+    const userId = (req as any).user.id;
+
+    const evento = await em.findOneOrFail(
+      Evento,
+      { id },
+      { populate: ['creador'] }
+    );
+
+    if (evento.creador.id !== userId) {
+      return res
+        .status(403)
+        .json({ message: 'No tienes permiso para eliminar este evento' });
+    }
+
     await em.removeAndFlush(evento);
+    res.status(200).json({ message: 'Evento eliminado', data: evento });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

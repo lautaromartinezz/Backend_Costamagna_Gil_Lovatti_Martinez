@@ -12,15 +12,18 @@ import { partidoRouter } from './evento/partido.routers.js';
 import { equipoRouter } from './equipo/equipo.routes.js';
 import { usuarioRouter } from './usuario/usuario.routes.js';
 import { participacionRouter } from './participacion/participacion.routes.js';
+import { localidadRouter } from './localidad/localidad.routes.js';
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(cors({
-  origin: 'http://localhost:5173', // o el origen de tu frontend
-  credentials: true
-})); // 👈 Esto permite todas las conexiones (ideal para desarrollo)
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // o el origen de tu frontend
+    credentials: true,
+  })
+); // 👈 Esto permite todas las conexiones (ideal para desarrollo)
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
@@ -40,6 +43,8 @@ app.use('/api/equipos', equipoRouter);
 app.use('/api/usuarios', usuarioRouter);
 
 app.use('/api/participacions', participacionRouter);
+
+app.use('/api/localidades', localidadRouter);
 
 app.use((_, res) => {
   res.status(404).send({ message: 'Resource not found' });
