@@ -1,0 +1,62 @@
+### GET all localidades
+http://localhost:3000/api/localidades
+
+
+### POST a localidad
+# @name createRosario
+POST http://localhost:3000/api/localidades
+Content-Type: application/json
+
+{
+    "nombre": "Rosario",
+    "descripcion": "Ciudad en Argentina"
+}
+
+### ID
+@id = {{createRosario.response.body.data.id}}
+
+### GET one localidad
+http://localhost:3000/api/localidades/{{id}}
+
+### PUT a localidad
+PUT http://localhost:3000/api/localidades/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Buenos Aires",
+  "descripcion": "Capital de Argentina"
+}
+
+### POST a localidad
+POST http://localhost:3000/api/localidades
+Content-Type: application/json
+
+{
+    "nombre": "Cordoba",
+    "descripcion": "Ciudad en Argentina"
+}
+
+### POST a localidad
+# @name createLocalidadToDelete
+POST http://localhost:3000/api/localidades
+Content-Type: application/json
+
+{
+    "nombre": "Mendoza",
+    "descripcion": "Ciudad en Argentina"
+}
+### DELETE a localidad
+@idToDelete = {{createLocalidadToDelete.response.body.data.id}}
+DELETE http://localhost:3000/api/localidades/{{idToDelete}}
+
+### PATCH a localidad
+PATCH http://localhost:3000/api/localidades/{{idToDelete}}
+Content-Type: application/json
+
+{
+  "nombre" : "Rosario Cambiada",
+  "descripcion" : "Ciudad en Argentina Cambiada"
+}
+
+### DELETE a localidad
+DELETE http://localhost:3000/api/localidades/{{idToDelete}}
