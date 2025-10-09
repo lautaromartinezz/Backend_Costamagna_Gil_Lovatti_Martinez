@@ -13,6 +13,7 @@ import { equipoRouter } from './equipo/equipo.routes.js';
 import { usuarioRouter } from './usuario/usuario.routes.js';
 import { participacionRouter } from './participacion/participacion.routes.js';
 import { localidadRouter } from './localidad/localidad.routes.js';
+import { adminRouter } from './admin/admin.routes.js';
 
 const app = express();
 app.use(express.json());
@@ -45,6 +46,8 @@ app.use('/api/usuarios', usuarioRouter);
 app.use('/api/participacions', participacionRouter);
 
 app.use('/api/localidades', localidadRouter);
+
+app.use('/api/admin', adminRouter);
 
 app.use((_, res) => {
   res.status(404).send({ message: 'Resource not found' });
