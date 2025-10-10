@@ -69,8 +69,6 @@ async function findOne(req: Request, res: Response) {
           'deporte',
           'equipos',
           'equipos.miembros',
-          'partidos',
-          'localidad',
           'equipos.capitan',
           'partidos',
         ],
