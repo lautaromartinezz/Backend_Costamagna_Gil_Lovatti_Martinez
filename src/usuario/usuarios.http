@@ -9,10 +9,10 @@ Content-Type: application/json
 {
   "nombre" : "juan",
   "apellido" : "Perez",
-  "usuario" : "mariap",
+  "usuario" : "admin",
   "contraseña" : "123456",
-  "email" : "maria@example.com",
-  "role" : "Usuario",
+  "email" : "admin@example.com",
+  "role" : "Administrador",
   "fechaNacimiento" : "1990-03-01",
   "participations": [3]
 }

@@ -43,6 +43,8 @@ async function findAll(req: Request, res: Response) {
           'equipos.miembros',
           'partidos',
           'localidad',
+          'equipos.capitan',
+          'partidos',
         ],
       }
     );
@@ -69,6 +71,8 @@ async function findOne(req: Request, res: Response) {
           'equipos.miembros',
           'partidos',
           'localidad',
+          'equipos.capitan',
+          'partidos',
         ],
       }
     );

@@ -13,6 +13,9 @@ function sanitizeparticipacionInput(
     puntos: req.body.puntos,
     minutosjugados: req.body.minutosjugados,
     faltas: req.body.faltas,
+    partido: req.body.partido,
+    usuario: req.body.usuario,
+    id: req.body.id,
   };
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -25,7 +28,13 @@ function sanitizeparticipacionInput(
 
 async function findAll(req: Request, res: Response) {
   try {
-    const participacions = await em.find(Participacion, {});
+    const participacions = await em.find(
+      Participacion,
+      {},
+      {
+        populate: ['usuario', 'partido'],
+      }
+    );
     res.status(200).json({
       message: 'participacions retrieved successfully',
       data: participacions,

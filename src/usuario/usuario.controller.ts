@@ -105,14 +105,14 @@ async function loginUsuario(req: Request, res: Response) {
   const { usuario, contraseña, remember } = req.body;
   const userRepo = em.getRepository(Usuario);
   try {
-    const user = await userRepo.findOneOrFail({ usuario});
+    const user = await userRepo.findOneOrFail({ usuario });
     if (!user) {
-      res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
       return;
     }
     const match = await bcrypt.compare(contraseña, user.contraseña);
     if (!match) {
-      res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
       return;
     }
     // Armamos el payload con los datos mínimos
@@ -122,39 +122,53 @@ async function loginUsuario(req: Request, res: Response) {
       apellido: user.apellido,
       usuario: user.usuario,
       role: user.role,
-      ip: req.ip
+      ip: req.ip,
     };
 
     // Creamos los token
     const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
     if (remember) {
-      const recuerdame = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
+      const recuerdame = jsonwebtoken.sign(payload, JWT_SECRET, {
+        expiresIn: '7d',
+      });
+      res.cookie('recuerdame', recuerdame, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      }); // 7 días
     }
 
     // Respondemos con el token y el payload
-    res.json({ token, role: payload.role, id: payload.id, nombre: payload.nombre, apellido: payload.apellido, usuario: payload.usuario });
+    res.json({
+      token,
+      role: payload.role,
+      id: payload.id,
+      nombre: payload.nombre,
+      apellido: payload.apellido,
+      usuario: payload.usuario,
+    });
   } catch (error) {
-    res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+    res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
   }
-};
+}
 function restaurarUsuario(req: Request, res: Response) {
   const { recuerdame } = req.cookies;
   if (!recuerdame) {
-    return res.status(401).json({ message: "No autorizado" });
+    return res.status(401).json({ message: 'No autorizado' });
   }
   try {
     const decoded = jsonwebtoken.verify(recuerdame, JWT_SECRET);
     if (
-    typeof decoded === 'object' &&
-    'ip' in decoded &&
-    decoded.ip == req.ip && // Verificamos que la IP coincida
-    decoded !== null &&
-    'id' in decoded &&
-    'nombre' in decoded &&
-    'apellido' in decoded &&
-    'usuario' in decoded &&
-    'role' in decoded
+      typeof decoded === 'object' &&
+      'ip' in decoded &&
+      decoded.ip == req.ip && // Verificamos que la IP coincida
+      decoded !== null &&
+      'id' in decoded &&
+      'nombre' in decoded &&
+      'apellido' in decoded &&
+      'usuario' in decoded &&
+      'role' in decoded
     ) {
       const payload = {
         id: decoded.id,
@@ -162,26 +176,52 @@ function restaurarUsuario(req: Request, res: Response) {
         apellido: decoded.apellido,
         usuario: decoded.usuario,
         role: decoded.role,
-        ip: req.ip
+        ip: req.ip,
       };
       const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-      res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
-      return res.json({ token, role: payload.role, id: payload.id, nombre: payload.nombre, apellido: payload.apellido, usuario: payload.usuario });
+      res.cookie('recuerdame', recuerdame, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      }); // 7 días
+      return res.json({
+        token,
+        role: payload.role,
+        id: payload.id,
+        nombre: payload.nombre,
+        apellido: payload.apellido,
+        usuario: payload.usuario,
+      });
     } else {
-      res.status(401).json({ message: "Token inválido" });
+      res.status(401).json({ message: 'Token inválido' });
     }
   } catch {
-    res.status(401).json({ message: "Token inválido" });
+    res.status(401).json({ message: 'Token inválido' });
   }
 }
 
 function logoutUsuario(req: Request, res: Response) {
   try {
-    res.clearCookie('recuerdame', { httpOnly: true, secure: false, sameSite: 'strict' });
+    res.clearCookie('recuerdame', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+    });
     res.status(200).json({ message: 'Logout exitoso' });
   } catch (error) {
     res.status(500).json({ message: 'Error al hacer logout' });
   }
 }
 
-export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, logoutUsuario, restaurarUsuario };
+export {
+  sanitizeUsuarioInput,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  loginUsuario,
+  logoutUsuario,
+  restaurarUsuario,
+};

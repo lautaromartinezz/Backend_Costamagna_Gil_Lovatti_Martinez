@@ -9,6 +9,7 @@ function sanitizeNoticiaInput(req: Request, res: Response, next: NextFunction) {
     titulo: req.body.titulo,
     descripcion: req.body.descripcion,
     id: req.body.id,
+    fecha: req.body.fecha,
   };
   //more checks here
 
@@ -22,7 +23,9 @@ function sanitizeNoticiaInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const noticias = await em.find(Noticia, {});
+    const orderParam = String(req.query.order || 'desc').toLowerCase();
+    const order: 'asc' | 'desc' = orderParam === 'asc' ? 'asc' : 'desc';
+    const noticias = await em.find(Noticia, {}, { orderBy: { fecha: order } });
     res
       .status(200)
       .json({ message: 'Noticias retrieved successfully', data: noticias });

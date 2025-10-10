@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/db/orm.js';
 import { Partido } from './partido.entity.js';
+import { Equipo } from '../equipo/equipo.entity.js';
+import { Usuario } from '../usuario/usuario.entity.js';
+import { Evento } from './evento.entity.js';
+import { Establecimiento } from '../establecimiento/establecimiento.entity.js';
 
 const em = orm.em;
 
@@ -43,6 +47,7 @@ async function findAll(req: Request, res: Response) {
           'mvp',
           'maxAnotador',
           'participations',
+          'participations.usuario',
         ],
       }
     );
@@ -67,11 +72,16 @@ async function findOne(req: Request, res: Response) {
           'evento',
           'evento.deporte',
           'establecimiento',
+          'equipoLocal.miembros',
+          'equipoVisitante.miembros',
           'equipoLocal',
           'equipoVisitante',
+          'equipoLocal.capitan',
+          'equipoVisitante.capitan',
           'mvp',
           'maxAnotador',
           'participations',
+          'participations.usuario',
         ],
       }
     );
@@ -83,7 +93,31 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const partido = em.create(Partido, req.body.sanitizedInput);
+    const input = { ...req.body.sanitizedInput };
+    // normalize fecha
+    if (input.fecha && typeof input.fecha === 'string') {
+      input.fecha = new Date(input.fecha);
+    }
+
+    // resolve relation ids to references when primitives are provided
+    const maybeResolveRef = (val: any, EntityClass: any) => {
+      if (val === undefined || val === null) return val;
+      const num = Number(val);
+      if (!Number.isNaN(num)) return em.getReference(EntityClass, num);
+      return val;
+    };
+
+    input.equipoLocal = maybeResolveRef(input.equipoLocal, Equipo);
+    input.equipoVisitante = maybeResolveRef(input.equipoVisitante, Equipo);
+    input.mvp = maybeResolveRef(input.mvp, Usuario);
+    input.maxAnotador = maybeResolveRef(input.maxAnotador, Usuario);
+    input.evento = maybeResolveRef(input.evento, Evento);
+    input.establecimiento = maybeResolveRef(
+      input.establecimiento,
+      Establecimiento
+    );
+
+    const partido = em.create(Partido, input);
     await em.flush();
     res.status(201).json({ message: 'partido created', data: partido });
   } catch (error: any) {
@@ -95,7 +129,27 @@ async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const partidoToUpdate = await em.findOneOrFail(Partido, { id });
-    em.assign(partidoToUpdate, req.body.sanitizedInput);
+    const input = { ...req.body.sanitizedInput };
+    if (input.fecha && typeof input.fecha === 'string') {
+      input.fecha = new Date(input.fecha);
+    }
+    const maybeResolveRef = (val: any, EntityClass: any) => {
+      if (val === undefined || val === null) return val;
+      const num = Number(val);
+      if (!Number.isNaN(num)) return em.getReference(EntityClass, num);
+      return val;
+    };
+    input.equipoLocal = maybeResolveRef(input.equipoLocal, Equipo);
+    input.equipoVisitante = maybeResolveRef(input.equipoVisitante, Equipo);
+    input.mvp = maybeResolveRef(input.mvp, Usuario);
+    input.maxAnotador = maybeResolveRef(input.maxAnotador, Usuario);
+    input.evento = maybeResolveRef(input.evento, Evento);
+    input.establecimiento = maybeResolveRef(
+      input.establecimiento,
+      Establecimiento
+    );
+
+    em.assign(partidoToUpdate, input);
     await em.flush();
     res.status(200).json({ message: 'partido updated', data: partidoToUpdate });
   } catch (error: any) {
