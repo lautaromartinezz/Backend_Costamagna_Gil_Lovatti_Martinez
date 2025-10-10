@@ -109,7 +109,7 @@ async function update(req: Request, res: Response) {
     );
 
     if (eventoToUpdate.creador.id !== userId) {
-      return res
+      res
         .status(403)
         .json({ message: 'No tienes permiso para modificar este evento' });
     }
@@ -137,7 +137,7 @@ async function remove(req: Request, res: Response) {
     );
 
     if (evento.creador.id !== userId) {
-      return res
+      res
         .status(403)
         .json({ message: 'No tienes permiso para eliminar este evento' });
     }
