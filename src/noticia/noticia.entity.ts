@@ -15,4 +15,7 @@ export class Noticia extends BaseEntity {
 
   @Property({ nullable: false })
   descripcion!: string;
+
+  @Property({ nullable: false })
+  fecha!: Date;
 }

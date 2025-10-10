@@ -42,7 +42,7 @@ app.use('/api/equipos', equipoRouter);
 
 app.use('/api/usuarios', usuarioRouter);
 
-app.use('/api/participacions', participacionRouter);
+app.use('/api/participaciones', participacionRouter);
 
 app.use('/api/localidades', localidadRouter);
 

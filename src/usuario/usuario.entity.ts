@@ -41,6 +41,13 @@ export class Usuario extends BaseEntity {
     cascade: [Cascade.ALL],
   })
   mvps? = new Collection<Partido>(this);
+
+  @OneToMany(() => Equipo, (equipo) => equipo.capitan, {
+    nullable: true,
+    cascade: [Cascade.ALL],
+  })
+  equipocomocapitan? = new Collection<Equipo>(this);
+
   @OneToMany(() => Partido, (partido) => partido.maxAnotador, {
     nullable: true,
     cascade: [Cascade.ALL],

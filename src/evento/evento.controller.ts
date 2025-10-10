@@ -35,7 +35,15 @@ async function findAll(req: Request, res: Response) {
     const eventos = await em.find(
       Evento,
       {},
-      { populate: ['deporte', 'equipos', 'partidos'] }
+      {
+        populate: [
+          'deporte',
+          'equipos',
+          'equipos.miembros',
+          'equipos.capitan',
+          'partidos',
+        ],
+      }
     );
     res
       .status(200)
@@ -53,7 +61,15 @@ async function findOne(req: Request, res: Response) {
     const evento = await em.findOneOrFail(
       Evento,
       { id },
-      { populate: ['deporte', 'equipos', 'partidos'] }
+      {
+        populate: [
+          'deporte',
+          'equipos',
+          'equipos.miembros',
+          'equipos.capitan',
+          'partidos',
+        ],
+      }
     );
     res.status(200).json({ message: 'found evento', data: evento });
   } catch (error: any) {

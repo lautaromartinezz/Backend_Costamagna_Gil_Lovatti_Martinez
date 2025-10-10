@@ -10,6 +10,7 @@ Content-Type: application/json
   "nombre" : "Real Madrid",
   "nombreCapitan" : "Daniel Carvajal",
   "puntos" : 999,
+  "capitan" : 1,
   "esPublico": true,
   "contraseña": "1234",
   "evento": 1,
