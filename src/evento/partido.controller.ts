@@ -93,31 +93,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const input = { ...req.body.sanitizedInput };
-    // normalize fecha
-    if (input.fecha && typeof input.fecha === 'string') {
-      input.fecha = new Date(input.fecha);
-    }
-
-    // resolve relation ids to references when primitives are provided
-    const maybeResolveRef = (val: any, EntityClass: any) => {
-      if (val === undefined || val === null) return val;
-      const num = Number(val);
-      if (!Number.isNaN(num)) return em.getReference(EntityClass, num);
-      return val;
-    };
-
-    input.equipoLocal = maybeResolveRef(input.equipoLocal, Equipo);
-    input.equipoVisitante = maybeResolveRef(input.equipoVisitante, Equipo);
-    input.mvp = maybeResolveRef(input.mvp, Usuario);
-    input.maxAnotador = maybeResolveRef(input.maxAnotador, Usuario);
-    input.evento = maybeResolveRef(input.evento, Evento);
-    input.establecimiento = maybeResolveRef(
-      input.establecimiento,
-      Establecimiento
-    );
-
-    const partido = em.create(Partido, input);
+    const partido = em.create(Partido, req.body.sanitizedInput);
     await em.flush();
     res.status(201).json({ message: 'partido created', data: partido });
   } catch (error: any) {
@@ -129,27 +105,7 @@ async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const partidoToUpdate = await em.findOneOrFail(Partido, { id });
-    const input = { ...req.body.sanitizedInput };
-    if (input.fecha && typeof input.fecha === 'string') {
-      input.fecha = new Date(input.fecha);
-    }
-    const maybeResolveRef = (val: any, EntityClass: any) => {
-      if (val === undefined || val === null) return val;
-      const num = Number(val);
-      if (!Number.isNaN(num)) return em.getReference(EntityClass, num);
-      return val;
-    };
-    input.equipoLocal = maybeResolveRef(input.equipoLocal, Equipo);
-    input.equipoVisitante = maybeResolveRef(input.equipoVisitante, Equipo);
-    input.mvp = maybeResolveRef(input.mvp, Usuario);
-    input.maxAnotador = maybeResolveRef(input.maxAnotador, Usuario);
-    input.evento = maybeResolveRef(input.evento, Evento);
-    input.establecimiento = maybeResolveRef(
-      input.establecimiento,
-      Establecimiento
-    );
-
-    em.assign(partidoToUpdate, input);
+    em.assign(partidoToUpdate, req.body.sanitizedInput);
     await em.flush();
     res.status(200).json({ message: 'partido updated', data: partidoToUpdate });
   } catch (error: any) {

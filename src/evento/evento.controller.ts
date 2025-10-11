@@ -45,6 +45,9 @@ async function findAll(req: Request, res: Response) {
           'localidad',
           'equipos.capitan',
           'partidos',
+          'partidos.equipoLocal',
+          'partidos.equipoVisitante',
+          'partidos.establecimiento',
         ],
       }
     );
@@ -69,8 +72,13 @@ async function findOne(req: Request, res: Response) {
           'deporte',
           'equipos',
           'equipos.miembros',
+          'partidos',
+          'localidad',
           'equipos.capitan',
           'partidos',
+          'partidos.equipoLocal',
+          'partidos.equipoVisitante',
+          'partidos.establecimiento',
         ],
       }
     );
@@ -133,7 +141,7 @@ async function remove(req: Request, res: Response) {
     const evento = await em.findOneOrFail(
       Evento,
       { id },
-      { populate: ['creador'] }
+      { populate: ['creador', 'equipos'] }
     );
 
     if (evento.creador.id !== userId) {
@@ -141,7 +149,6 @@ async function remove(req: Request, res: Response) {
         .status(403)
         .json({ message: 'No tienes permiso para eliminar este evento' });
     }
-
     await em.removeAndFlush(evento);
     res.status(200).json({ message: 'Evento eliminado', data: evento });
   } catch (error: any) {
