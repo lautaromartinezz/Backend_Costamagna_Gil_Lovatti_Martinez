@@ -173,7 +173,24 @@ async function findAllByEvento(req: Request, res: Response) {
     const eventoId = Number.parseInt(req.params.eventoId);
     const partidos = await em.find(Partido, {
       evento: eventoId,
-    });
+    }, 
+    {
+        populate: [
+          'evento',
+          'evento.deporte',
+          'establecimiento',
+          'equipoLocal.miembros',
+          'equipoVisitante.miembros',
+          'equipoLocal',
+          'equipoVisitante',
+          'equipoLocal.capitan',
+          'equipoVisitante.capitan',
+          'mvp',
+          'maxAnotador',
+          'participations',
+          'participations.usuario',
+        ],
+      });
     res.status(200).json({
       message: 'Partidos encontrados satisfactoriamente',
       data: partidos,
