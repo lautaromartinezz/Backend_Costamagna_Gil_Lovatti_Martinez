@@ -33,6 +33,9 @@ export class Usuario extends BaseEntity {
   @Property({ nullable: true })
   fechaNacimiento!: Date;
 
+  @Property({ nullable: false })
+  estado!: boolean;
+
   @Property({ nullable: true })
   ultimoLogin?: Date;
 
