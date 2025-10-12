@@ -8,6 +8,7 @@ import {
   remove,
   postAddMember,
   deleteSelfFromMembers,
+  findAllByEvento,
 } from './equipo.controller.js';
 import { authMiddleware } from '../shared/authMiddleware.js';
 
@@ -15,6 +16,7 @@ export const equipoRouter = Router();
 
 equipoRouter.get('/', findAll);
 
+equipoRouter.get('/evento/:eventoId', findAllByEvento);
 equipoRouter.get('/:id', findOne);
 equipoRouter.post('/', sanitizeEquipoInput, add);
 equipoRouter.put('/:id', sanitizeEquipoInput, update);

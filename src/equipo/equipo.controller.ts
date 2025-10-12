@@ -231,6 +231,18 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
       .json({ message: 'Error al eliminar miembro', error: error.message });
   }
 }
+
+async function findAllByEvento(req: Request, res: Response) {
+  try{
+    const eventoId = Number.parseInt(req.params.eventoId);
+    const equipos = await em.find(Equipo, { evento: eventoId }, { populate: ['miembros', 'evento'] });
+    res.status(200).json({ message: 'Equipos del evento encontrados', data: equipos });
+  }
+  catch (error: any) {
+    res.status(500).json({ message: 'Error al recuperar los equipos del evento' });
+}
+}
+
 export {
   sanitizeEquipoInput,
   findAll,
@@ -240,4 +252,5 @@ export {
   remove,
   postAddMember,
   deleteSelfFromMembers,
+  findAllByEvento,
 };
