@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { Participacion } from './participacion.entity.js';
 import { orm } from '../shared/db/orm.js';
-
+import { Equipo } from '../equipo/equipo.entity.js';
+import { Usuario } from '../usuario/usuario.entity.js';
 const em = orm.em;
 
 function sanitizeparticipacionInput(
@@ -90,9 +91,64 @@ async function remove(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const participacion = em.getReference(Participacion, id);
     await em.removeAndFlush(participacion);
+    res.status(200).json({ message: 'participacion deleted' });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 }
 
-export { sanitizeparticipacionInput, findAll, findOne, add, update, remove };
+const traerparticipacionesporequipo: RequestHandler = async function (
+  req,
+  res
+) {
+  try {
+    const partidoIdRaw = (req.query.partidoId ?? req.query.partidoid) as string;
+    const equipoIdRaw = (req.query.equipoid ?? req.query.equipo) as string;
+    const idpartido = Number.parseInt(partidoIdRaw);
+    const equipoid = Number.parseInt(equipoIdRaw);
+
+    console.log(`Fetching equipo with ID: ${equipoid}`);
+    const equipo = await em.findOneOrFail(
+      Equipo,
+      { id: equipoid },
+      { populate: ['miembros'] }
+    );
+
+    console.log(`Equipo fetched successfully:`, equipo);
+    const miembroIds = equipo.miembros
+      .getItems()
+      .map((miembro) => miembro.id)
+      .filter((id): id is number => id !== undefined);
+
+    console.log(`Member IDs extracted:`, miembroIds);
+
+    const participaciones = await em.find(
+      Participacion,
+      {
+        partido: idpartido,
+        usuario: { $in: miembroIds },
+      },
+      { populate: ['usuario'] }
+    );
+
+    console.log(`Participaciones fetched successfully:`, participaciones);
+
+    res.status(200).json({
+      message: 'Participaciones retrieved successfully',
+      data: participaciones,
+    });
+  } catch (error: any) {
+    console.error('Error in traerparticipacionesporequipo:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export {
+  sanitizeparticipacionInput,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  traerparticipacionesporequipo,
+};

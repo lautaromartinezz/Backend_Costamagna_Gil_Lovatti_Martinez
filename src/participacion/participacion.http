@@ -10,7 +10,10 @@ Content-Type: application/json
 {
   "puntos": 20,
   "minutosjugados": 30,
-  "faltas": 2
+  "faltas": 2,
+  "partido": 1,
+  "usuario": 2
+
 }
 
 ### ID
@@ -55,5 +58,5 @@ Content-Type: application/json
 
 ### DELETE a participacion
 @idToDelete = {{createParticipacionToDelete.response.body.data.id}}
-DELETE http://localhost:3000/api/participaciones/5
+DELETE http://localhost:3000/api/participaciones/16
 
