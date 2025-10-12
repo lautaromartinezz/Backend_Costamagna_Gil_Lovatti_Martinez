@@ -21,10 +21,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
     participations: req.body.participations,
     fechaNacimiento:
       req.body.fechaNacimiento !== undefined ? req.body.fechaNacimiento : null,
-    ultimoLogin:
-      req.body.ultimoLogin !== undefined ? req.body.ultimoLogin : null,
   };
-    
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
       delete req.body.sanitizedInput[key];
@@ -118,11 +115,6 @@ async function loginUsuario(req: Request, res: Response) {
       res.status(401).json({ message: "Usuario o contraseña incorrectos" });
       return;
     }
-
-    // Actualizamos el ultimo login
-    user.ultimoLogin = new Date();
-    await em.flush();
-
     // Armamos el payload con los datos mínimos
     const payload = {
       id: user.id,

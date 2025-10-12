@@ -18,7 +18,7 @@ function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
     deporte: req.body.deporte,
     equipos: req.body.equipos ? req.body.equipos : [],
     partidos: req.body.partidos ? req.body.partidos : [],
-    localidad: req.body.localidad ? req.body.localidad : 1,
+    localidad: req.body.localidad,
   };
   //more checks here
 
