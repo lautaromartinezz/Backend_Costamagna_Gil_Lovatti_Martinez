@@ -23,7 +23,9 @@ export class Partido extends BaseEntity {
   @Property({ nullable: true })
   juez?: string;
   @Property({ nullable: true })
-  resultado?: string;
+  resultadoLocal?: number;
+  @Property({ nullable: true })
+  resultadoVisitante?: number;
 
   //cambiar la relacion cuando se implemente la entidad Equipo y Participante
   @ManyToOne(() => Equipo, { nullable: false })

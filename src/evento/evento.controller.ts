@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/db/orm.js';
 import { Evento } from './evento.entity.js';
-
+import { EntityManager } from '@mikro-orm/mysql';
+import { randomInt } from 'crypto';
 const em = orm.em;
 
 function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
@@ -20,6 +21,7 @@ function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
     equipos: req.body.equipos ? req.body.equipos : [],
     partidos: req.body.partidos ? req.body.partidos : [],
     localidad: req.body.localidad,
+    codigo: req.body.codigo,
   };
   //more checks here
 
@@ -96,6 +98,7 @@ async function add(req: Request, res: Response) {
     const evento = em.create(Evento, {
       ...sanitizedInput,
       creador: userId,
+      codigo: await generarCodigoUnico(em),
     });
 
     await em.flush();
@@ -103,6 +106,23 @@ async function add(req: Request, res: Response) {
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
+}
+
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function randomCode(len = 8): string {
+  let out = '';
+  for (let i = 0; i < len; i++) out += ALPHABET[randomInt(0, ALPHABET.length)];
+  return out;
+}
+
+async function generarCodigoUnico(em: EntityManager, len = 8): Promise<string> {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = randomCode(len);
+    const exists = await em.count(Evento, { codigo: code });
+    if (exists === 0) return code;
+  }
+  return generarCodigoUnico(em, len + 1);
 }
 
 async function update(req: Request, res: Response) {
@@ -133,6 +153,19 @@ async function update(req: Request, res: Response) {
   }
 }
 
+async function buscarxcodigo(req: Request, res: Response) {
+  try {
+    const codigo = req.params.codigo;
+    const evento = await em.findOne(Evento, { codigo });
+    if (!evento) {
+      res.status(404).json({ message: 'Evento no encontrado' });
+    }
+    res.status(200).json({ message: 'Evento encontrado', data: evento });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
@@ -156,4 +189,12 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeEventoInput, findAll, findOne, add, update, remove };
+export {
+  sanitizeEventoInput,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  buscarxcodigo,
+};
