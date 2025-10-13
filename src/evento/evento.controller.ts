@@ -23,7 +23,6 @@ function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
     localidad: req.body.localidad,
     codigo: req.body.codigo,
   };
-  //more checks here
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
@@ -94,6 +93,33 @@ async function add(req: Request, res: Response) {
   try {
     const userId = (req as any).user.id;
     const sanitizedInput = req.body.sanitizedInput;
+    if (
+      sanitizedInput.fechaFinInscripcion < sanitizedInput.fechaInicioInscripcion
+    ) {
+      res.status(400).json({
+        message:
+          'La fecha de fin de inscripción no puede ser anterior a la fecha de inicio de inscripción.',
+      });
+    }
+    if (
+      sanitizedInput.fechaInicioEvento &&
+      sanitizedInput.fechaInicioEvento < sanitizedInput.fechaFinInscripcion
+    ) {
+      res.status(400).json({
+        message:
+          'La fecha de inicio del evento no puede ser anterior a la fecha de fin de inscripción.',
+      });
+    }
+    if (
+      sanitizedInput.fechaFinEvento &&
+      sanitizedInput.fechaInicioEvento &&
+      sanitizedInput.fechaFinEvento < sanitizedInput.fechaInicioEvento
+    ) {
+      res.status(400).json({
+        message:
+          'La fecha de fin del evento no puede ser anterior a la fecha de inicio del evento.',
+      });
+    }
 
     const evento = em.create(Evento, {
       ...sanitizedInput,
