@@ -94,7 +94,38 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const partido = em.create(Partido, req.body.sanitizedInput);
+    const sanitizedPartido = req.body.sanitizedInput;
+
+    const evento = await em.findOneOrFail(Evento, {
+      id: sanitizedPartido.evento,
+    });
+    const fechaStr: string | undefined = sanitizedPartido.fecha;
+    const partidoDate = (() => {
+      if (fechaStr) return new Date(`${fechaStr}`);
+    })();
+
+    const inicio = evento?.fechaInicioEvento
+      ? new Date(evento.fechaInicioEvento)
+      : null;
+    const fin = evento?.fechaFinEvento ? new Date(evento.fechaFinEvento) : null;
+
+    if (
+      inicio &&
+      partidoDate &&
+      fin &&
+      !(partidoDate >= inicio && partidoDate <= fin)
+    ) {
+      res.status(400).json({
+        message: 'El partido no se puede crear fuera del rango del evento',
+      });
+    }
+    if (sanitizedPartido.equipoLocal === sanitizedPartido.equipoVisitante) {
+      res.status(400).json({
+        message: 'El equipo local y visitante no pueden ser el mismo',
+      });
+    }
+
+    const partido = em.create(Partido, sanitizedPartido);
     await em.flush();
     res.status(201).json({ message: 'partido created', data: partido });
   } catch (error: any) {
