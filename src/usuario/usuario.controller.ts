@@ -67,7 +67,27 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   let usuario;
   try {
-    usuario = em.create(Usuario, req.body.sanitizedInput);
+    const input = req.body.sanitizedInput;
+
+    // validar duplicados: usuario
+    if (input.usuario) {
+      const existsUser = await em.findOne(Usuario, { usuario: input.usuario });
+      if (existsUser) {
+        res.status(409).json({ message: 'Nombre de usuario no disponible' });
+        return;
+      }
+    }
+
+    // validar duplicados: email
+    if (input.email) {
+      const existsEmail = await em.findOne(Usuario, { email: input.email });
+      if (existsEmail) {
+        res.status(409).json({ message: 'El email ya está registrado' });
+        return;
+      }
+    }
+
+    usuario = em.create(Usuario, input);
     const hashedPassword = await bcrypt.hash(usuario.contraseña, 8);
     usuario.contraseña = hashedPassword;
     await em.flush();
@@ -109,7 +129,7 @@ async function loginUsuario(req: Request, res: Response) {
   const { usuario, contraseña, remember } = req.body;
   const userRepo = em.getRepository(Usuario);
   try {
-    const user = await userRepo.findOneOrFail({ usuario});
+    const user = await userRepo.findOne({ usuario });
     if (!user) {
       res.status(401).json({ message: "Usuario o contraseña incorrectos" });
       return;
