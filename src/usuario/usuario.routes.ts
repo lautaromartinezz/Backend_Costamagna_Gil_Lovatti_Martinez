@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, logoutUsuario, restaurarUsuario, bajaUsuario } from './usuario.controller.js'
+import { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, logoutUsuario, restaurarUsuario, bajaUsuario, findSome } from './usuario.controller.js'
 import { authMiddleware, requireAdmin } from '../shared/authMiddleware.js'
 
 export const usuarioRouter = Router()
@@ -16,6 +16,7 @@ usuarioRouter.post('/logout', logoutUsuario) // logout: borra la cookie recuerda
 
 // Rutas protegidas con authMiddleware
 usuarioRouter.get('/', authMiddleware, requireAdmin, findAll)
+usuarioRouter.get('/filter', authMiddleware, requireAdmin, findSome)
 usuarioRouter.post('/baja/:id', authMiddleware, requireAdmin, bajaUsuario)
 usuarioRouter.get('/:id', authMiddleware, requireAdmin, findOne)
 usuarioRouter.put('/:id', authMiddleware, requireAdmin, sanitizeUsuarioInput, update)

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Usuario } from './usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
+import { FilterQuery } from '@mikro-orm/core';
 import jsonwebtoken from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
@@ -61,6 +62,28 @@ async function findOne(req: Request, res: Response) {
     res.status(200).json({ message: 'Usuario encontrado', data: usuario });
   } catch (error: any) {
     res.status(500).json({ message: 'Usuario no encontrado' });
+  }
+}
+
+async function findSome(req: Request, res: Response) {
+  try {
+    const filter: FilterQuery<Usuario> = {};
+
+    const qrol = typeof req.query.rol === 'string' ? req.query.rol : undefined;
+    if (qrol) {filter.role = qrol;}
+    
+    const estado = typeof req.query.estado === 'string' ? req.query.estado : undefined;
+    let qestado;
+    if (estado == 'Activo') {qestado = true;} else { qestado = false; }
+    if (estado) {filter.estado = qestado;}
+
+    const usuarios = await em.find(Usuario, filter);
+    res.status(200).json({
+      message: 'Usuarios encontrados satisfactoriamente',
+      data: usuarios,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error al recuperar los usuarios' });
   }
 }
 
@@ -262,4 +285,4 @@ async function bajaUsuario(req: Request, res: Response) {
   }
 }
 
-export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, logoutUsuario, restaurarUsuario, bajaUsuario };
+export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, logoutUsuario, restaurarUsuario, bajaUsuario, findSome };
