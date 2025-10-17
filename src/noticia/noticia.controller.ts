@@ -11,7 +11,6 @@ function sanitizeNoticiaInput(req: Request, res: Response, next: NextFunction) {
     descripcion: req.body.descripcion,
     fecha: req.body.fecha,
     id: req.body.id,
-    fecha: req.body.fecha,
   };
   //more checks here
 

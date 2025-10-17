@@ -261,9 +261,44 @@ function logoutUsuario(req: Request, res: Response) {
   }
 }
 
+async function bajaUsuario(req: Request, res: Response) {
+  try {
+    const idRaw = (req.query.id ?? req.params.id ?? req.body.id) as string | number | undefined;
+    const id = idRaw !== undefined ? Number.parseInt(String(idRaw), 10) : NaN;
+
+    if (!Number.isInteger(id) || Number.isNaN(id)) {
+      res.status(400).json({ message: 'Id inválido' });
+      return;
+    }
+
+    const usuarioToBaja = await em.findOne(Usuario, { id });
+    if (!usuarioToBaja) {
+      res.status(404).json({ message: 'Usuario no encontrado' });
+      return;
+    }
+
+    // toggle estado
+    usuarioToBaja.estado = !Boolean(usuarioToBaja.estado);
+    await em.flush();
+
+    console.log("Usuario dado de baja/alta:", usuarioToBaja);
+    res.status(200).json({
+      message: usuarioToBaja.estado === false ? 'Usuario dado de baja' : 'Usuario reactivado',
+      data: usuarioToBaja
+    });
+    return;
+  } catch (error: any) {
+    console.error("Error al dar de baja el usuario:", error);
+    res.status(500).json({ message: 'Error al dar de baja el usuario', error: error?.message ?? String(error) });
+    return;
+  }
+}
+
 export {
   sanitizeUsuarioInput,
   findAll,
+  findSome,
+  bajaUsuario,
   findOne,
   add,
   update,
