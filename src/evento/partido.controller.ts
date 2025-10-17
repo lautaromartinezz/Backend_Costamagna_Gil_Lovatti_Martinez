@@ -118,11 +118,13 @@ async function add(req: Request, res: Response) {
       res.status(400).json({
         message: 'El partido no se puede crear fuera del rango del evento',
       });
+      return;
     }
     if (sanitizedPartido.equipoLocal === sanitizedPartido.equipoVisitante) {
       res.status(400).json({
         message: 'El equipo local y visitante no pueden ser el mismo',
       });
+      return;
     }
 
     const partido = em.create(Partido, sanitizedPartido);

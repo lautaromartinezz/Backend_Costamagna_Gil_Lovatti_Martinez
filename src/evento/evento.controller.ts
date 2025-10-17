@@ -100,6 +100,7 @@ async function add(req: Request, res: Response) {
         message:
           'La fecha de fin de inscripción no puede ser anterior a la fecha de inicio de inscripción.',
       });
+      return;
     }
     if (
       sanitizedInput.fechaInicioEvento &&
@@ -109,6 +110,7 @@ async function add(req: Request, res: Response) {
         message:
           'La fecha de inicio del evento no puede ser anterior a la fecha de fin de inscripción.',
       });
+      return;
     }
     if (
       sanitizedInput.fechaFinEvento &&
@@ -119,6 +121,7 @@ async function add(req: Request, res: Response) {
         message:
           'La fecha de fin del evento no puede ser anterior a la fecha de inicio del evento.',
       });
+      return;
     }
 
     const evento = em.create(Evento, {

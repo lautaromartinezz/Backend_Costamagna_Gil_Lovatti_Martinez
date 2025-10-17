@@ -63,6 +63,7 @@ async function findOne(req: Request, res: Response) {
           'partidoVisitante',
           'partidoLocal',
           'evento.deporte',
+          'capitan',
         ],
       }
     );
@@ -154,6 +155,10 @@ async function postAddMember(req: Request, res: Response) {
     const usuario = await em.findOne(Usuario, { id: usuarioId });
     if (!usuario) {
       res.status(400).json({ message: 'Usuario no existe' });
+      return;
+    }
+    if ((equipo.miembros as any).contains(usuario)) {
+      res.status(400).json({ message: 'Usuario ya es miembro del equipo' });
       return;
     }
 
