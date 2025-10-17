@@ -10,6 +10,7 @@ import { BaseEntity } from '../shared/db/baseEntity.entity.js';
 import { Equipo } from '../equipo/equipo.entity.js';
 import { Partido } from '../evento/partido.entity.js';
 import { Participacion } from '../participacion/participacion.entity.js';
+import { Evento } from '../evento/evento.entity.js';
 @Entity()
 export class Usuario extends BaseEntity {
   @Property({ nullable: false })
@@ -47,6 +48,13 @@ export class Usuario extends BaseEntity {
     cascade: [Cascade.ALL],
   })
   mvps? = new Collection<Partido>(this);
+
+  @OneToMany(() => Equipo, (equipo) => equipo.capitan, {
+    nullable: true,
+    cascade: [Cascade.ALL],
+  })
+  equipocomocapitan? = new Collection<Equipo>(this);
+
   @OneToMany(() => Partido, (partido) => partido.maxAnotador, {
     nullable: true,
     cascade: [Cascade.ALL],
@@ -56,4 +64,9 @@ export class Usuario extends BaseEntity {
     cascade: [Cascade.ALL],
   })
   participations? = new Collection<Participacion>(this);
+
+  @OneToMany(() => Evento, (evento) => evento.creador, {
+    cascade: [Cascade.ALL],
+  })
+  eventos = new Collection<Evento>(this);
 }

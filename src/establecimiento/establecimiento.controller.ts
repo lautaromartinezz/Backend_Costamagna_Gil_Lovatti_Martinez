@@ -13,7 +13,7 @@ function sanitizeEstablecimientoInput(
   req.body.sanitizedInput = {
     nombre: req.body.nombre,
     direccion: req.body.direccion,
-    eventoId: req.body.eventoId,
+    evento: req.body.evento,
     id: req.body.id,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {

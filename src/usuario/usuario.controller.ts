@@ -152,25 +152,16 @@ async function loginUsuario(req: Request, res: Response) {
   const { usuario, contraseña, remember } = req.body;
   const userRepo = em.getRepository(Usuario);
   try {
-    const user = await userRepo.findOne({ usuario });
+    const user = await userRepo.findOneOrFail({ usuario });
     if (!user) {
-      res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
       return;
     }
     const match = await bcrypt.compare(contraseña, user.contraseña);
     if (!match) {
-      res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
       return;
     }
-    if (user.estado === false) {
-      res.status(403).json({ message: "Usuario deshabilitado, contacte al administrador" });
-      return;
-    }
-
-    // Actualizamos el ultimo login
-    user.ultimoLogin = new Date();
-    await em.flush();
-
     // Armamos el payload con los datos mínimos
     const payload = {
       id: user.id,
@@ -178,28 +169,40 @@ async function loginUsuario(req: Request, res: Response) {
       apellido: user.apellido,
       usuario: user.usuario,
       role: user.role,
-      estado: user.estado,
-      ip: req.ip
+      ip: req.ip,
     };
 
     // Creamos los token
     const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
     if (remember) {
-      const recuerdame = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
+      const recuerdame = jsonwebtoken.sign(payload, JWT_SECRET, {
+        expiresIn: '7d',
+      });
+      res.cookie('recuerdame', recuerdame, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      }); // 7 días
     }
 
     // Respondemos con el token y el payload
-    res.json({ token, role: payload.role, id: payload.id, nombre: payload.nombre, apellido: payload.apellido, usuario: payload.usuario, estado: payload.estado });
+    res.json({
+      token,
+      role: payload.role,
+      id: payload.id,
+      nombre: payload.nombre,
+      apellido: payload.apellido,
+      usuario: payload.usuario,
+    });
   } catch (error) {
-    res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+    res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
   }
-};
-
-async function restaurarUsuario(req: Request, res: Response) {
+}
+function restaurarUsuario(req: Request, res: Response) {
   const { recuerdame } = req.cookies;
   if (!recuerdame) {
-    return res.status(401).json({ message: "No autorizado" });
+    return res.status(401).json({ message: 'No autorizado' });
   }
   try {
     const decoded = jsonwebtoken.verify(recuerdame, JWT_SECRET);
@@ -208,81 +211,64 @@ async function restaurarUsuario(req: Request, res: Response) {
       'ip' in decoded &&
       decoded.ip == req.ip && // Verificamos que la IP coincida
       decoded !== null &&
-      'id' in decoded
-    ) {
-      const user = await em.findOneOrFail(Usuario, { id: decoded.id });
-      if (user.estado === false) {
-        res.status(403).json({ message: "Usuario deshabilitado, contacte al administrador" });
-        return;
-      }
-      if (
+      'id' in decoded &&
       'nombre' in decoded &&
       'apellido' in decoded &&
       'usuario' in decoded &&
-      'role' in decoded &&
-      'estado' in decoded
-      ) {
-        const payload = {
-          id: decoded.id,
-          nombre: decoded.nombre,
-          apellido: decoded.apellido,
-          usuario: decoded.usuario,
-          role: decoded.role,
-          estado: decoded.estado,
-          ip: req.ip
-        };
-        const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-        res.cookie('recuerdame', recuerdame, { httpOnly: true, secure: false, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 días
-        return res.json({ token, role: payload.role, id: payload.id, nombre: payload.nombre, apellido: payload.apellido, usuario: payload.usuario, estado: payload.estado });
-      }
+      'role' in decoded
+    ) {
+      const payload = {
+        id: decoded.id,
+        nombre: decoded.nombre,
+        apellido: decoded.apellido,
+        usuario: decoded.usuario,
+        role: decoded.role,
+        ip: req.ip,
+      };
+      const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+      res.cookie('recuerdame', recuerdame, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      }); // 7 días
+      return res.json({
+        token,
+        role: payload.role,
+        id: payload.id,
+        nombre: payload.nombre,
+        apellido: payload.apellido,
+        usuario: payload.usuario,
+      });
     } else {
-      res.status(401).json({ message: "Token inválido" });
+      res.status(401).json({ message: 'Token inválido' });
     }
   } catch {
-    res.status(401).json({ message: "Token inválido" });
+    res.status(401).json({ message: 'Token inválido' });
   }
 }
 
 function logoutUsuario(req: Request, res: Response) {
   try {
-    res.clearCookie('recuerdame', { httpOnly: true, secure: false, sameSite: 'strict' });
+    res.clearCookie('recuerdame', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+    });
     res.status(200).json({ message: 'Logout exitoso' });
   } catch (error) {
     res.status(500).json({ message: 'Error al hacer logout' });
   }
 }
 
-async function bajaUsuario(req: Request, res: Response) {
-  try {
-    const idRaw = (req.query.id ?? req.params.id ?? req.body.id) as string | number | undefined;
-    const id = idRaw !== undefined ? Number.parseInt(String(idRaw), 10) : NaN;
-
-    if (!Number.isInteger(id) || Number.isNaN(id)) {
-      res.status(400).json({ message: 'Id inválido' });
-      return;
-    }
-
-    const usuarioToBaja = await em.findOne(Usuario, { id });
-    if (!usuarioToBaja) {
-      res.status(404).json({ message: 'Usuario no encontrado' });
-      return;
-    }
-
-    // toggle estado
-    usuarioToBaja.estado = !Boolean(usuarioToBaja.estado);
-    await em.flush();
-
-    console.log("Usuario dado de baja/alta:", usuarioToBaja);
-    res.status(200).json({
-      message: usuarioToBaja.estado === false ? 'Usuario dado de baja' : 'Usuario reactivado',
-      data: usuarioToBaja
-    });
-    return;
-  } catch (error: any) {
-    console.error("Error al dar de baja el usuario:", error);
-    res.status(500).json({ message: 'Error al dar de baja el usuario', error: error?.message ?? String(error) });
-    return;
-  }
-}
-
-export { sanitizeUsuarioInput, findAll, findOne, add, update, remove, loginUsuario, logoutUsuario, restaurarUsuario, bajaUsuario, findSome };
+export {
+  sanitizeUsuarioInput,
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  loginUsuario,
+  logoutUsuario,
+  restaurarUsuario,
+};
