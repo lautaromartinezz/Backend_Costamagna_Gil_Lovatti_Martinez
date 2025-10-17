@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Deporte } from './deporte.entity.js';
 import { orm } from '../shared/db/orm.js';
+import { FilterQuery } from '@mikro-orm/core';
 
 const em = orm.em;
 
@@ -45,6 +46,27 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+async function findSome(req: Request, res: Response) {
+  try {
+    const filter: FilterQuery<Deporte> = {};
+    const qCantMaxJug = typeof req.query.cantMaxJug === 'string' ? parseInt(req.query.cantMaxJug) : undefined;
+    const qCantMinJug = typeof req.query.cantMinJug === 'string' ? parseInt(req.query.cantMinJug) : undefined;
+    const qMinDesde = typeof req.query.minDesde === 'string' ? parseInt(req.query.minDesde) : undefined;
+    const qMaxHasta = typeof req.query.maxHasta === 'string' ? parseInt(req.query.maxHasta) : undefined;
+
+    if (qCantMaxJug !== undefined) filter.cantMaxJugadores = { $lte: qCantMaxJug };
+    if (qCantMinJug !== undefined) filter.cantMinJugadores = { $gte: qCantMinJug };
+    if (qMinDesde && qMaxHasta) filter.duracion = { $gte: qMinDesde, $lte: qMaxHasta };
+    else if (qMinDesde) filter.duracion = { $gte: qMinDesde };
+    else if (qMaxHasta) filter.duracion = { $lte: qMaxHasta };
+
+    const deportes = await em.find(Deporte, filter);
+    res.status(200).json({ message: 'Deportes retrieved successfully', data: deportes });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error retrieving deportes', error: error.message });
+  }
+}
+
 async function add(req: Request, res: Response) {
   try {
     const deporte = em.create(Deporte, req.body.sanitizedInput);
@@ -78,4 +100,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeDeporteInput, findAll, findOne, add, update, remove };
+export { sanitizeDeporteInput, findAll, findOne, add, update, remove, findSome };
