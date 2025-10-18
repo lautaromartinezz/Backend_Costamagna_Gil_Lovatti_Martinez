@@ -13,7 +13,8 @@ function sanitizePartidoInput(req: Request, res: Response, next: NextFunction) {
     fecha: req.body.fecha,
     hora: req.body.hora,
     juez: req.body.juez,
-    resultado: req.body.resultado,
+    resultadoLocal: req.body.resultadoLocal,
+    resultadoVisitante: req.body.resultadoVisitante,
     equipoLocal: req.body.equipoLocal,
     equipoVisitante: req.body.equipoVisitante,
     mvp: req.body.mvp,
@@ -93,31 +94,40 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const input = { ...req.body.sanitizedInput };
-    // normalize fecha
-    if (input.fecha && typeof input.fecha === 'string') {
-      input.fecha = new Date(input.fecha);
+    const sanitizedPartido = req.body.sanitizedInput;
+
+    const evento = await em.findOneOrFail(Evento, {
+      id: sanitizedPartido.evento,
+    });
+    const fechaStr: string | undefined = sanitizedPartido.fecha;
+    const partidoDate = (() => {
+      if (fechaStr) return new Date(`${fechaStr}`);
+    })();
+
+    const inicio = evento?.fechaInicioEvento
+      ? new Date(evento.fechaInicioEvento)
+      : null;
+    const fin = evento?.fechaFinEvento ? new Date(evento.fechaFinEvento) : null;
+
+    if (
+      inicio &&
+      partidoDate &&
+      fin &&
+      !(partidoDate >= inicio && partidoDate <= fin)
+    ) {
+      res.status(400).json({
+        message: 'El partido no se puede crear fuera del rango del evento',
+      });
+      return;
+    }
+    if (sanitizedPartido.equipoLocal === sanitizedPartido.equipoVisitante) {
+      res.status(400).json({
+        message: 'El equipo local y visitante no pueden ser el mismo',
+      });
+      return;
     }
 
-    // resolve relation ids to references when primitives are provided
-    const maybeResolveRef = (val: any, EntityClass: any) => {
-      if (val === undefined || val === null) return val;
-      const num = Number(val);
-      if (!Number.isNaN(num)) return em.getReference(EntityClass, num);
-      return val;
-    };
-
-    input.equipoLocal = maybeResolveRef(input.equipoLocal, Equipo);
-    input.equipoVisitante = maybeResolveRef(input.equipoVisitante, Equipo);
-    input.mvp = maybeResolveRef(input.mvp, Usuario);
-    input.maxAnotador = maybeResolveRef(input.maxAnotador, Usuario);
-    input.evento = maybeResolveRef(input.evento, Evento);
-    input.establecimiento = maybeResolveRef(
-      input.establecimiento,
-      Establecimiento
-    );
-
-    const partido = em.create(Partido, input);
+    const partido = em.create(Partido, sanitizedPartido);
     await em.flush();
     res.status(201).json({ message: 'partido created', data: partido });
   } catch (error: any) {
@@ -129,27 +139,7 @@ async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const partidoToUpdate = await em.findOneOrFail(Partido, { id });
-    const input = { ...req.body.sanitizedInput };
-    if (input.fecha && typeof input.fecha === 'string') {
-      input.fecha = new Date(input.fecha);
-    }
-    const maybeResolveRef = (val: any, EntityClass: any) => {
-      if (val === undefined || val === null) return val;
-      const num = Number(val);
-      if (!Number.isNaN(num)) return em.getReference(EntityClass, num);
-      return val;
-    };
-    input.equipoLocal = maybeResolveRef(input.equipoLocal, Equipo);
-    input.equipoVisitante = maybeResolveRef(input.equipoVisitante, Equipo);
-    input.mvp = maybeResolveRef(input.mvp, Usuario);
-    input.maxAnotador = maybeResolveRef(input.maxAnotador, Usuario);
-    input.evento = maybeResolveRef(input.evento, Evento);
-    input.establecimiento = maybeResolveRef(
-      input.establecimiento,
-      Establecimiento
-    );
-
-    em.assign(partidoToUpdate, input);
+    em.assign(partidoToUpdate, req.body.sanitizedInput);
     await em.flush();
     res.status(200).json({ message: 'partido updated', data: partidoToUpdate });
   } catch (error: any) {

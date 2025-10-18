@@ -77,4 +77,4 @@ Content-Type: application/json
 DELETE http://localhost:3000/api/partidos/{{idToDelete}}
 
 ### DELETE a partido
-DELETE http://localhost:3000/api/partidos/2
+DELETE http://localhost:3000/api/partidos/1

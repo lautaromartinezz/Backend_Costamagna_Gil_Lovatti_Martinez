@@ -36,6 +36,8 @@ export class Evento extends BaseEntity {
   fechaInicioEvento?: Date;
   @Property({ nullable: true })
   fechaFinEvento?: Date;
+  @Property({ nullable: false, unique: true })
+  codigo!: string;
 
   @ManyToOne(() => Usuario, { nullable: true })
   creador!: Rel<Usuario>;

@@ -6,6 +6,7 @@ import {
   add,
   update,
   remove,
+  buscarxcodigo,
   findSome
 } from './evento.controller.js';
 import { authMiddleware } from '../shared/authMiddleware.js';
@@ -19,3 +20,4 @@ eventoRouter.post('/', authMiddleware, sanitizeEventoInput, add);
 eventoRouter.put('/:id', authMiddleware, sanitizeEventoInput, update);
 eventoRouter.patch('/:id', authMiddleware, sanitizeEventoInput, update);
 eventoRouter.delete('/:id', authMiddleware, remove);
+eventoRouter.get('/codigo/:codigo', buscarxcodigo);
