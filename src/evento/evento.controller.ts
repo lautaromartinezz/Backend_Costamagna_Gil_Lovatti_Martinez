@@ -206,7 +206,7 @@ async function remove(req: Request, res: Response) {
     const evento = await em.findOneOrFail(
       Evento,
       { id },
-      { populate: ['creador', 'equipos'] }
+      { populate: ['creador', 'equipos', 'partidos', 'establecimientos'] }
     );
 
     if (evento.creador.id !== userId) {

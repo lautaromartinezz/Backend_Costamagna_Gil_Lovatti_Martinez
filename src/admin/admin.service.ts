@@ -12,10 +12,10 @@ export async function getBasicStats(em: EntityManager) {
     const eventos = await em.count(Evento, {});
     const publicos = await em.count(Evento, { esPublico: true });
     const partidosJugados = await em.count(Partido, {
-      resultado: { $ne: null }
+      resultadoLocal: { $ne: null },
     });
     const partidosPorJugar = await em.count(Partido, {
-      fecha: { $gt: now }
+      fecha: { $gt: now },
     });
 
     const thirtyDaysAgo = new Date();
@@ -27,14 +27,13 @@ export async function getBasicStats(em: EntityManager) {
 
     const activeEventos = await em.count(Evento, {
       fechaFinEvento: { $gte: now },
-      fechaInicioEvento: {$lte: now},
+      fechaInicioEvento: { $lte: now },
     });
 
-    const rows = await em.getConnection().execute(
-      `SELECT COUNT(DISTINCT deporte_id) AS cnt FROM evento`
-    );
+    const rows = await em
+      .getConnection()
+      .execute(`SELECT COUNT(DISTINCT deporte_id) AS cnt FROM evento`);
     const activeDeportes = Number((rows as any)[0]?.cnt ?? 0);
-
 
     return {
       totalUsers,
@@ -61,7 +60,7 @@ export async function getDeportesStats(em: EntityManager) {
       GROUP BY d.id, d.nombre`
     );
 
-    const deportesConEventosMap = (rows as any[]).map(r => ({
+    const deportesConEventosMap = (rows as any[]).map((r) => ({
       deporteId: Number(r.deporteId),
       deporte: String(r.deporte),
       totalEventos: Number(r.totalEventos),
