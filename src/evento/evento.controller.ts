@@ -310,6 +310,7 @@ async function findSome(req: Request, res: Response) {
 export {
   sanitizeEventoInput,
   findAll,
+  findSome,
   findOne,
   add,
   update,
