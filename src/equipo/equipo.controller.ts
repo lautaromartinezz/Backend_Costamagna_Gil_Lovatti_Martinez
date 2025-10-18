@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Equipo } from './equipo.entity.js';
+import { Evento } from '../evento/evento.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
 
@@ -62,6 +63,7 @@ async function findOne(req: Request, res: Response) {
           'partidoVisitante',
           'partidoLocal',
           'evento.deporte',
+          'capitan',
         ],
       }
     );
@@ -73,6 +75,26 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    const sanitizedInput = req.body.sanitizedInput;
+    const eventoId = sanitizedInput.evento;
+    if (!eventoId) {
+      res.status(400).json({ message: 'eventoId es requerido' });
+      return;
+    }
+    const evento = await em.findOne(Evento, { id: eventoId });
+    if (!evento) {
+      res.status(404).json({ message: 'Evento no encontrado' });
+      return;
+    }
+
+    const equiposActuales = await em.count(Equipo, { evento: evento.id });
+    const maxEquipos = Number(evento.cantEquiposMax);
+    if (equiposActuales >= maxEquipos) {
+      res.status(400).json({
+        message: 'El evento ya alcanzó la cantidad máxima de equipos',
+      });
+      return;
+    }
     const equipo = em.create(Equipo, req.body.sanitizedInput);
     await em.flush();
     res.status(201).json({ message: 'Equipo creado', data: equipo });
@@ -107,24 +129,36 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-// simple add member endpoint: POST /equipos/:id/miembros { usuarioId }
 async function postAddMember(req: Request, res: Response) {
   try {
     const equipoId = Number.parseInt(req.params.id);
     const { usuarioId } = req.body;
+
     if (!usuarioId) {
       res.status(400).json({ message: 'usuarioId requerido' });
       return;
     }
-
     const equipo = await em.findOneOrFail(
       Equipo,
       { id: equipoId },
-      { populate: ['miembros'] }
+      { populate: ['miembros', 'evento', 'evento.deporte'] }
     );
+    const deporte = (equipo as any).evento?.deporte as any;
+    const cantmax = deporte?.cantMaxJugadores;
+    if (cantmax && equipo.miembros.length >= cantmax) {
+      res.status(400).json({
+        message: 'El equipo ya alcanzó la cantidad máxima de miembros',
+      });
+      return;
+    }
+
     const usuario = await em.findOne(Usuario, { id: usuarioId });
     if (!usuario) {
       res.status(400).json({ message: 'Usuario no existe' });
+      return;
+    }
+    if ((equipo.miembros as any).contains(usuario)) {
+      res.status(400).json({ message: 'Usuario ya es miembro del equipo' });
       return;
     }
 
@@ -160,8 +194,6 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
         .status(400)
         .json({ message: 'Id de usuario en token inválido' });
     }
-
-    // Optional usuarioId in body: if provided, requester must be the capitan to remove that user
     const { usuarioId } = req.body || {};
 
     const equipo = await em.findOneOrFail(
@@ -169,8 +201,6 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
       { id },
       { populate: ['miembros', 'capitan'] }
     );
-
-    // determine the id of the user to remove
     const targetId =
       usuarioId !== undefined && usuarioId !== null
         ? Number(usuarioId)
