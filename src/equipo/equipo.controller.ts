@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { Equipo } from './equipo.entity.js';
 import { Evento } from '../evento/evento.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
+import { FilterQuery } from '@mikro-orm/core';
 
 const em = orm.em;
 
@@ -273,6 +274,34 @@ async function findAllByEvento(req: Request, res: Response) {
 }
 }
 
+async function findByUsuario(req: Request, res: Response) {
+  try {
+    const userId = Number(req.params.id);
+
+    const filter: FilterQuery<Equipo> = {
+      $or: [
+        { capitan: userId },
+        { miembros: { id: userId } },
+      ],
+    };
+
+    const equipos = await em.find(
+      Equipo,
+      filter,
+      {
+        populate: ['evento', 'evento.partidos', 'evento.deporte'],
+        orderBy: { nombre: 'asc' },
+      }
+    );
+
+    res.status(200).json({ message: 'OK', data: equipos });
+    return;
+  } catch (e: any) {
+    res.status(500).json({ message: 'Error obteniendo equipos del usuario', error: e?.message });
+    return;
+  }
+};
+
 export {
   sanitizeEquipoInput,
   findAll,
@@ -283,4 +312,5 @@ export {
   postAddMember,
   deleteSelfFromMembers,
   findAllByEvento,
+  findByUsuario,
 };

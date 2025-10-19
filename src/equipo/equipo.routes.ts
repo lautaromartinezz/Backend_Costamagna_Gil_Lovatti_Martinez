@@ -9,13 +9,13 @@ import {
   postAddMember,
   deleteSelfFromMembers,
   findAllByEvento,
+  findByUsuario,
 } from './equipo.controller.js';
 import { authMiddleware } from '../shared/authMiddleware.js';
 
 export const equipoRouter = Router();
 
 equipoRouter.get('/', findAll);
-
 equipoRouter.get('/evento/:eventoId', findAllByEvento);
 equipoRouter.get('/:id', findOne);
 equipoRouter.post('/', sanitizeEquipoInput, add);
@@ -26,3 +26,4 @@ equipoRouter.patch('/:id/miembros', authMiddleware, (req, res) => {
   deleteSelfFromMembers(req, res);
 });
 equipoRouter.delete('/:id', remove);
+equipoRouter.get('/usuario/:id', findByUsuario);
