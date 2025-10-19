@@ -194,6 +194,11 @@ async function loginUsuario(req: Request, res: Response) {
       email: user.email,
       estado: user.estado,
     });
+
+    // Registrar último acceso
+    user.ultimoLogin = new Date();
+    await em.flush();
+
   } catch (error) {
     res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
   }
@@ -229,6 +234,10 @@ async function restaurarUsuario(req: Request, res: Response) {
         sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
+
+      const u = await em.findOne(Usuario, { id: payload.id });
+      if (u) { u.ultimoLogin = new Date(); await em.flush(); }
+
       return res.json({
         token,
         role: payload.role,
@@ -236,6 +245,7 @@ async function restaurarUsuario(req: Request, res: Response) {
         usuario: payload.usuario,
         email: payload.email,
       });
+      
     } else {
       res.status(401).json({ message: 'Token inválido' });
     }
