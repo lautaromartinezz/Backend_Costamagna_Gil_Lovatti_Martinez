@@ -165,9 +165,8 @@ async function loginUsuario(req: Request, res: Response) {
     // Armamos el payload con los datos mínimos
     const payload = {
       id: user.id,
-      nombre: user.nombre,
-      apellido: user.apellido,
       usuario: user.usuario,
+      email: user.email,
       role: user.role,
       ip: req.ip,
     };
@@ -191,15 +190,20 @@ async function loginUsuario(req: Request, res: Response) {
       token,
       role: payload.role,
       id: payload.id,
-      nombre: payload.nombre,
-      apellido: payload.apellido,
       usuario: payload.usuario,
+      email: user.email,
+      estado: user.estado,
     });
+
+    // Registrar último acceso
+    user.ultimoLogin = new Date();
+    await em.flush();
+
   } catch (error) {
     res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
   }
 }
-function restaurarUsuario(req: Request, res: Response) {
+async function restaurarUsuario(req: Request, res: Response) {
   const { recuerdame } = req.cookies;
   if (!recuerdame) {
     return res.status(401).json({ message: 'No autorizado' });
@@ -212,16 +216,14 @@ function restaurarUsuario(req: Request, res: Response) {
       decoded.ip == req.ip && // Verificamos que la IP coincida
       decoded !== null &&
       'id' in decoded &&
-      'nombre' in decoded &&
-      'apellido' in decoded &&
       'usuario' in decoded &&
+      'email' in decoded &&
       'role' in decoded
     ) {
       const payload = {
         id: decoded.id,
-        nombre: decoded.nombre,
-        apellido: decoded.apellido,
         usuario: decoded.usuario,
+        email: decoded.email,
         role: decoded.role,
         ip: req.ip,
       };
@@ -231,15 +233,19 @@ function restaurarUsuario(req: Request, res: Response) {
         secure: false,
         sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
-      }); // 7 días
+      });
+
+      const u = await em.findOne(Usuario, { id: payload.id });
+      if (u) { u.ultimoLogin = new Date(); await em.flush(); }
+
       return res.json({
         token,
         role: payload.role,
         id: payload.id,
-        nombre: payload.nombre,
-        apellido: payload.apellido,
         usuario: payload.usuario,
+        email: payload.email,
       });
+      
     } else {
       res.status(401).json({ message: 'Token inválido' });
     }
@@ -294,6 +300,30 @@ async function bajaUsuario(req: Request, res: Response) {
   }
 }
 
+async function perfilUsuario(req: Request, res: Response) {
+  try {
+    const requester = parseInt(req.params.id);
+    const usuario = await em.findOne(Usuario, { id: requester });
+    if (!usuario) {
+      res.status(404).json({ message: 'Usuario no encontrado' });
+      return;
+    }
+    const payload = {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      usuario: usuario.usuario,
+      email: usuario.email,
+      fechaNacimiento: usuario.fechaNacimiento,
+      role: usuario.role,
+      estado: usuario.estado,
+    };
+    res.status(200).json({ message: 'Perfil de usuario', data: payload });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener el perfil del usuario' + error });
+  }
+}
+
 export {
   sanitizeUsuarioInput,
   findAll,
@@ -306,4 +336,5 @@ export {
   loginUsuario,
   logoutUsuario,
   restaurarUsuario,
+  perfilUsuario
 };
