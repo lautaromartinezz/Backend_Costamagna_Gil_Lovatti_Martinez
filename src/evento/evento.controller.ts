@@ -307,6 +307,45 @@ async function findSome(req: Request, res: Response) {
   }
 }
 
+//findXCreator y findXParticipant tendrian que ser con AuthMiddleware pero no lo pude hacer andar
+async function findXCreator(req: Request, res: Response) {
+  try {
+    const userId = Number.parseInt(req.params.idCreador);
+    if (!userId) {
+      res.status(401).json({ message: 'User ID no proporcionado' });
+    }
+    const eventos = await em.find(
+      Evento,
+      { creador: { id: userId } },
+      { populate: ['deporte', 'localidad', 'creador'] }
+    );
+    res.status(200).json({ message: 'Eventos del creador', data: eventos });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: (req as any).user.id, error: error.message });
+  }
+}
+async function findXParticipant(req: Request, res: Response) {
+  try {
+    const userId = Number.parseInt(req.params.idUsuario);
+    if (!userId) {
+      res.status(401).json({ message: 'User ID no proporcionado' });
+    }
+    const eventos = await em.find(
+      Evento,
+      { equipos: { miembros: { id: userId } } },
+      { populate: ['deporte', 'localidad', 'equipos.miembros'] }
+    );
+
+    res
+      .status(200)
+      .json({ message: 'Eventos donde participa el usuario', data: eventos });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 export {
   sanitizeEventoInput,
   findAll,
@@ -316,4 +355,6 @@ export {
   update,
   remove,
   buscarxcodigo,
+  findXCreator,
+  findXParticipant,
 };
