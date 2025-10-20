@@ -87,6 +87,15 @@ async function add(req: Request, res: Response) {
       res.status(404).json({ message: 'Evento no encontrado' });
       return;
     }
+    const ahora = new Date();
+    const fechaini = evento.fechaInicioInscripcion;
+    const fechafin = evento.fechaFinInscripcion;
+    if (ahora < fechaini || ahora > fechafin) {
+      res.status(400).json({
+        message: 'No se puede crear un equipo fuera del período de inscripción',
+      });
+      return;
+    }
 
     const equiposActuales = await em.count(Equipo, { evento: evento.id });
     const maxEquipos = Number(evento.cantEquiposMax);
@@ -144,6 +153,16 @@ async function postAddMember(req: Request, res: Response) {
       { id: equipoId },
       { populate: ['miembros', 'evento', 'evento.deporte'] }
     );
+    const fechaini = (equipo as any).evento?.fechaInicioInscripcion;
+    const fechafin = (equipo as any).evento?.fechaFinInscripcion;
+    const ahora = new Date();
+    if (ahora < fechaini || ahora > fechafin) {
+      res.status(400).json({
+        message:
+          'No se puede agregar miembros fuera del período de inscripción',
+      });
+      return;
+    }
     const deporte = (equipo as any).evento?.deporte as any;
     const cantmax = deporte?.cantMaxJugadores;
     if (cantmax && equipo.miembros.length >= cantmax) {
@@ -215,7 +234,6 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
     const capId = (equipo.capitan as any)?.id;
     const isCaptain = capId === requesterId;
 
-    // If trying to remove someone else, only captain can do it
     if (targetId !== requesterId && !isCaptain) {
       return res
         .status(403)
@@ -232,7 +250,6 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
     const usuario = await em.findOne(Usuario, { id: targetId });
     if (!usuario) return res.status(400).json({ message: 'Usuario no existe' });
 
-    // ensure miembro exists on the equipo
     if (
       (equipo.miembros as any).contains &&
       (equipo.miembros as any).contains(usuario)
@@ -264,14 +281,21 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
 }
 
 async function findAllByEvento(req: Request, res: Response) {
-  try{
+  try {
     const eventoId = Number.parseInt(req.params.eventoId);
-    const equipos = await em.find(Equipo, { evento: eventoId }, { populate: ['miembros', 'evento'] });
-    res.status(200).json({ message: 'Equipos del evento encontrados', data: equipos });
+    const equipos = await em.find(
+      Equipo,
+      { evento: eventoId },
+      { populate: ['miembros', 'evento'] }
+    );
+    res
+      .status(200)
+      .json({ message: 'Equipos del evento encontrados', data: equipos });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: 'Error al recuperar los equipos del evento' });
   }
-  catch (error: any) {
-    res.status(500).json({ message: 'Error al recuperar los equipos del evento' });
-}
 }
 
 async function findByUsuario(req: Request, res: Response) {
@@ -279,28 +303,24 @@ async function findByUsuario(req: Request, res: Response) {
     const userId = Number(req.params.id);
 
     const filter: FilterQuery<Equipo> = {
-      $or: [
-        { capitan: userId },
-        { miembros: { id: userId } },
-      ],
+      $or: [{ capitan: userId }, { miembros: { id: userId } }],
     };
 
-    const equipos = await em.find(
-      Equipo,
-      filter,
-      {
-        populate: ['evento', 'evento.partidos', 'evento.deporte'],
-        orderBy: { nombre: 'asc' },
-      }
-    );
+    const equipos = await em.find(Equipo, filter, {
+      populate: ['evento', 'evento.partidos', 'evento.deporte'],
+      orderBy: { nombre: 'asc' },
+    });
 
     res.status(200).json({ message: 'OK', data: equipos });
     return;
   } catch (e: any) {
-    res.status(500).json({ message: 'Error obteniendo equipos del usuario', error: e?.message });
+    res.status(500).json({
+      message: 'Error obteniendo equipos del usuario',
+      error: e?.message,
+    });
     return;
   }
-};
+}
 
 export {
   sanitizeEquipoInput,
