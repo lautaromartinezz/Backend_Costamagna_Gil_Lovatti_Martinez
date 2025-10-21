@@ -3,7 +3,7 @@ import { Equipo } from './equipo.entity.js';
 import { Evento } from '../evento/evento.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
-import { FilterQuery } from '@mikro-orm/core';
+import { FilterQuery, PopulateHint } from '@mikro-orm/core';
 
 const em = orm.em;
 
@@ -130,7 +130,19 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const equipoToRemove = await em.findOneOrFail(Equipo, { id });
+    const equipoToRemove = await em.findOneOrFail(
+      Equipo,
+      { id },
+      {
+        populate: [
+          'miembros',
+          'capitan',
+          'evento',
+          'partidoLocal',
+          'partidoVisitante',
+        ],
+      }
+    );
     em.remove(equipoToRemove);
     await em.flush();
     res.status(200).json({ message: 'Equipo eliminado' });
