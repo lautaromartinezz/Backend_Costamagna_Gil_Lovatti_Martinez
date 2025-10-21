@@ -4,11 +4,18 @@ import { Evento } from '../evento/evento.entity.js';
 
 @Entity()
 export class Localidad extends BaseEntity {
-  @Property({ nullable: false })
-  nombre!: string;
+  @Property({ nullable: false, unique: true })
+  descripcion!: string;
 
   @Property({ nullable: false })
-  descripcion!: string;
+  lat!: string;
+
+  @Property({ nullable: false })
+  lng!: string;
+
+  @Property({ nullable: false })
+  codigo!: string;
+
 
   @OneToMany(() => Evento, (evento) => evento.localidad)
   eventos = new Collection<Evento>(this);
