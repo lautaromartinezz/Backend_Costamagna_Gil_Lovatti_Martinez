@@ -136,6 +136,37 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
+  const sanitizedPartido = req.body.sanitizedInput;
+  const evento = await em.findOneOrFail(Evento, {
+    id: sanitizedPartido.evento,
+  });
+  const fechaStr: string | undefined = sanitizedPartido.fecha;
+  const partidoDate = (() => {
+    if (fechaStr) return new Date(`${fechaStr}`);
+  })();
+
+  const inicio = evento?.fechaInicioEvento
+    ? new Date(evento.fechaInicioEvento)
+    : null;
+  const fin = evento?.fechaFinEvento ? new Date(evento.fechaFinEvento) : null;
+
+  if (
+    inicio &&
+    partidoDate &&
+    fin &&
+    !(partidoDate >= inicio && partidoDate <= fin)
+  ) {
+    res.status(400).json({
+      message: 'El partido no se puede crear fuera del rango del evento',
+    });
+    return;
+  }
+  if (sanitizedPartido.equipoLocal === sanitizedPartido.equipoVisitante) {
+    res.status(400).json({
+      message: 'El equipo local y visitante no pueden ser el mismo',
+    });
+    return;
+  }
   try {
     const id = Number.parseInt(req.params.id);
     const partidoToUpdate = await em.findOneOrFail(Partido, { id });
@@ -161,10 +192,12 @@ async function remove(req: Request, res: Response) {
 async function findAllByEvento(req: Request, res: Response) {
   try {
     const eventoId = Number.parseInt(req.params.eventoId);
-    const partidos = await em.find(Partido, {
-      evento: eventoId,
-    }, 
-    {
+    const partidos = await em.find(
+      Partido,
+      {
+        evento: eventoId,
+      },
+      {
         populate: [
           'evento',
           'evento.deporte',
@@ -180,7 +213,8 @@ async function findAllByEvento(req: Request, res: Response) {
           'participations',
           'participations.usuario',
         ],
-      });
+      }
+    );
     res.status(200).json({
       message: 'Partidos encontrados satisfactoriamente',
       data: partidos,
