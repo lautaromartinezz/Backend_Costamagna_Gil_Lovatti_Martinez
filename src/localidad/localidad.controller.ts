@@ -10,8 +10,10 @@ function sanitizeLocalidadInput(
   next: NextFunction
 ) {
   req.body.sanitizedInput = {
-    nombre: req.body.nombre,
     descripcion: req.body.descripcion,
+    lat: req.body.lat,
+    lng: req.body.lng,
+    codigo: req.body.codigo,
     id: req.body.id,
     eventos: req.body.eventos ? req.body.eventos : [],
   };
@@ -57,13 +59,49 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+// async function add(req: Request, res: Response) {
+//   try {
+//     const localidad = em.create(Localidad, req.body.sanitizedInput);
+//     const existe = await em.findOne(Localidad, { descripcion: localidad.descripcion })
+//     if (existe) {
+//       res.status(400).json({ message: 'La localidad ya existe' });
+//       return;
+//     }
+//     await em.flush();
+//     res.status(201).json({ message: 'Localidad creada', data: localidad });
+//   } catch (error: any) {
+//     res.status(500).json({ message: 'Error al crear la localidad' });
+//   }
+// }
+
 async function add(req: Request, res: Response) {
+  const em = orm.em.fork();
   try {
-    const localidad = em.create(Localidad, req.body.sanitizedInput);
+    const input = req.body.sanitizedInput as Localidad;
+
+    // validar requeridos
+    if (!input.descripcion || !input.lat || !input.lng || !input.codigo) {
+      res.status(400).json({ message: 'descripcion, lat, lng y codigo son obligatorios' });
+      return;
+    }
+
+    const existe = await em.findOne(Localidad, { descripcion: input.descripcion });
+    if (existe) {
+      res.status(409).json({ message: 'La localidad ya existe' });
+      return;
+    }
+
+    const localidad = em.create(Localidad, input);
     await em.flush();
     res.status(201).json({ message: 'Localidad creada', data: localidad });
+    return;
   } catch (error: any) {
-    res.status(500).json({ message: 'Error al crear la localidad' });
+    console.error('Error al crear la localidad:', error);
+    if (error?.code === 'ER_DUP_ENTRY' || /unique/i.test(error?.message || '')) {
+      res.status(409).json({ message: 'La localidad ya existe (constraint)' });
+      return;
+    }
+    res.status(500).json({ message: 'Error al crear la localidad', error: error?.message });
   }
 }
 
