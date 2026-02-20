@@ -176,4 +176,5 @@ export {
   update,
   remove,
   traerparticipacionesporequipo,
+  traerParticipacionesPorUsuarioEnTorneo,
 };

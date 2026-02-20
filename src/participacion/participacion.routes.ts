@@ -7,6 +7,7 @@ import {
   update,
   remove,
   traerparticipacionesporequipo,
+  traerParticipacionesPorUsuarioEnTorneo,
 } from './participacion.controller.js';
 
 export const participacionRouter = Router();
@@ -17,6 +18,7 @@ participacionRouter.get(
   '/participacionesxequipo',
   traerparticipacionesporequipo
 );
+participacionRouter.get('/participacionesPorUsuarioEnTorneo', traerParticipacionesPorUsuarioEnTorneo);
 participacionRouter.get('/:id', findOne);
 participacionRouter.post('/', sanitizeparticipacionInput, add);
 participacionRouter.put('/:id', sanitizeparticipacionInput, update);
