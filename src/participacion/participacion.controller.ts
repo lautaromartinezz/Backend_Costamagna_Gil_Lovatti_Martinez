@@ -3,12 +3,13 @@ import { Participacion } from './participacion.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { Equipo } from '../equipo/equipo.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
+import { Populate } from '@mikro-orm/core';
 const em = orm.em;
 
 function sanitizeparticipacionInput(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   req.body.sanitizedInput = {
     puntos: req.body.puntos,
@@ -34,7 +35,7 @@ async function findAll(req: Request, res: Response) {
       {},
       {
         populate: ['usuario', 'partido'],
-      }
+      },
     );
     res.status(200).json({
       message: 'participacions retrieved successfully',
@@ -99,7 +100,7 @@ async function remove(req: Request, res: Response) {
 
 const traerparticipacionesporequipo: RequestHandler = async function (
   req,
-  res
+  res,
 ) {
   try {
     const partidoIdRaw = (req.query.partidoId ?? req.query.partidoid) as string;
@@ -111,7 +112,7 @@ const traerparticipacionesporequipo: RequestHandler = async function (
     const equipo = await em.findOneOrFail(
       Equipo,
       { id: equipoid },
-      { populate: ['miembros'] }
+      { populate: ['miembros'] },
     );
 
     console.log(`Equipo fetched successfully:`, equipo);
@@ -128,7 +129,7 @@ const traerparticipacionesporequipo: RequestHandler = async function (
         partido: idpartido,
         usuario: { $in: miembroIds },
       },
-      { populate: ['usuario'] }
+      { populate: ['usuario'] },
     );
 
     console.log(`Participaciones fetched successfully:`, participaciones);
@@ -143,21 +144,30 @@ const traerparticipacionesporequipo: RequestHandler = async function (
   }
 };
 
-const traerParticipacionesPorUsuarioEnTorneo: RequestHandler = async function (req, res) {
+const traerParticipacionesPorUsuarioEnTorneo: RequestHandler = async function (
+  req,
+  res,
+) {
   try {
     const usuarioIdRaw = req.query.usuarioId as string;
     const idEventoRaw = req.query.eventoId as string;
     const usuarioId = Number.parseInt(usuarioIdRaw);
     const idevento = Number.parseInt(idEventoRaw);
-    console.log(`Fetching participaciones for usuario ID: ${usuarioId} in evento ID: ${idevento}`);
+    console.log(
+      `Fetching participaciones for usuario ID: ${usuarioId} in evento ID: ${idevento}`,
+    );
 
-    const participaciones = await em.find(Participacion, {
-      usuario: usuarioId,
-      partido: {
-        evento: idevento,
+    const participaciones = await em.find(
+      Participacion,
+      {
+        usuario: usuarioId,
+        partido: {
+          evento: idevento,
+        },
       },
-    }, { populate: ['partido'] });
-    
+      { populate: ['partido'] },
+    );
+
     res.status(200).json({
       message: 'Participaciones retrieved successfully',
       data: participaciones,
@@ -166,22 +176,32 @@ const traerParticipacionesPorUsuarioEnTorneo: RequestHandler = async function (r
     console.error('Error in traerParticipacionesPorUsuarioEnTorneo:', error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
-const buscarParticipacionesPorTorneo = async function (req: Request, res: Response) {
+//se puede ver de parametrizar la funcion para poder trabajar con varios populate
+const buscarParticipacionesPorTorneo = async function <
+  p extends Populate<Participacion>,
+>(req: Request, res: Response, populate?: p) {
   const idEventoRaw = req.query.eventoId as string;
-    const idevento = Number.parseInt(idEventoRaw);
-    console.log(`Fetching participaciones for evento ID: ${idevento}`);
-    const participaciones = await em.find(Participacion, {
+  const idevento = Number.parseInt(idEventoRaw);
+  console.log(`Fetching participaciones for evento ID: ${idevento}`);
+  const participaciones = await em.find(
+    Participacion,
+    {
       partido: {
         evento: idevento,
       },
-    }, { populate: ['partido', 'usuario'] });
-    return participaciones;
-}
+    },
+    { populate: populate ?? (['partido'] as const) },
+  );
+  return participaciones;
+};
 
-const traerParticipacionesPorTorneo: RequestHandler = async function (req, res) {
-  try{
+const traerParticipacionesPorTorneo: RequestHandler = async function (
+  req,
+  res,
+) {
+  try {
     const participaciones = buscarParticipacionesPorTorneo(req, res);
     res.status(200).json({
       message: 'Participaciones retrieved successfully',
@@ -191,30 +211,52 @@ const traerParticipacionesPorTorneo: RequestHandler = async function (req, res) 
     console.error('Error in traerParticipacionesPorTorneo:', error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
-const traerParticipacionesTotalesPorTorneo: RequestHandler = async function (req, res) {
-  try{
-    const participaciones = await buscarParticipacionesPorTorneo(req, res);
+const traerParticipacionesTotalesPorTorneo: RequestHandler = async function (
+  req,
+  res,
+) {
+  try {
+    const participaciones = await buscarParticipacionesPorTorneo(req, res, [
+      'partido',
+      'usuario.equipos',
+    ] as const);
     const participacionesTotales = new Map<number, Participacion>();
     for (const participacion of participaciones) {
       const usuario = participacion.usuario;
-      if(!usuario?.id) continue;
+      if (!usuario?.id) continue;
       const usuarioId = usuario.id;
       if (!participacionesTotales.has(usuarioId)) {
-        participacionesTotales.set(usuarioId, new Participacion());
+        const p = new Participacion();
+        p.usuario = usuario;
+        participacionesTotales.set(usuarioId, p);
       }
       participacionesTotales.get(usuarioId)?.sumarParticipacion(participacion);
     }
     res.status(200).json({
       message: 'Participaciones totales retrieved successfully',
-      data: Array.from(participacionesTotales.entries()),
+      data: Array.from(participacionesTotales.values()).map((p) => ({
+        puntos: p.puntos,
+        minutosjugados: p.minutosjugados,
+        faltas: p.faltas,
+        usuario: {
+          id: p.usuario!.id,
+          nombre: p.usuario!.nombre,
+          apellido: p.usuario!.apellido,
+          equipos: [
+            p.usuario!.getEquipoEvento(
+              Number.parseInt(req.query.eventoId as string),
+            ),
+          ],
+        },
+      })),
     });
   } catch (error: any) {
     console.error('Error in traerParticipacionesTotalesPorTorneo:', error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 export {
   sanitizeparticipacionInput,

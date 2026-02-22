@@ -22,14 +22,20 @@ export class Participacion extends BaseEntity {
   @ManyToOne(() => Usuario, { nullable: true })
   usuario?: Rel<Usuario>;
 
-  constructor(puntos = 0, minutosjugados = 0, faltas = 0) {
+  constructor(
+    usuario = new Usuario(),
+    puntos = 0,
+    minutosjugados = 0,
+    faltas = 0,
+  ) {
     super();
+    this.usuario = usuario;
     this.puntos = puntos;
     this.minutosjugados = minutosjugados;
     this.faltas = faltas;
   }
 
-  sumarParticipacion(p:Participacion) {
+  sumarParticipacion(p: Participacion) {
     this.puntos += p.puntos;
     this.minutosjugados += p.minutosjugados;
     this.faltas += p.faltas;
