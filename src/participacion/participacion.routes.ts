@@ -8,6 +8,8 @@ import {
   remove,
   traerparticipacionesporequipo,
   traerParticipacionesPorUsuarioEnTorneo,
+  traerParticipacionesPorTorneo,
+  traerParticipacionesTotalesPorTorneo,
 } from './participacion.controller.js';
 
 export const participacionRouter = Router();
@@ -18,6 +20,9 @@ participacionRouter.get(
   '/participacionesxequipo',
   traerparticipacionesporequipo
 );
+
+participacionRouter.get('/participacionesTotalesPorTorneo', traerParticipacionesTotalesPorTorneo);
+participacionRouter.get('/participacionesportorneo', traerParticipacionesPorTorneo);
 participacionRouter.get('/participacionesPorUsuarioEnTorneo', traerParticipacionesPorUsuarioEnTorneo);
 participacionRouter.get('/:id', findOne);
 participacionRouter.post('/', sanitizeparticipacionInput, add);

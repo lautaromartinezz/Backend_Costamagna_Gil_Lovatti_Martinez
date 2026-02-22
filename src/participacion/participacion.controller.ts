@@ -168,6 +168,54 @@ const traerParticipacionesPorUsuarioEnTorneo: RequestHandler = async function (r
   }
 }
 
+const buscarParticipacionesPorTorneo = async function (req: Request, res: Response) {
+  const idEventoRaw = req.query.eventoId as string;
+    const idevento = Number.parseInt(idEventoRaw);
+    console.log(`Fetching participaciones for evento ID: ${idevento}`);
+    const participaciones = await em.find(Participacion, {
+      partido: {
+        evento: idevento,
+      },
+    }, { populate: ['partido', 'usuario'] });
+    return participaciones;
+}
+
+const traerParticipacionesPorTorneo: RequestHandler = async function (req, res) {
+  try{
+    const participaciones = buscarParticipacionesPorTorneo(req, res);
+    res.status(200).json({
+      message: 'Participaciones retrieved successfully',
+      data: participaciones,
+    });
+  } catch (error: any) {
+    console.error('Error in traerParticipacionesPorTorneo:', error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+const traerParticipacionesTotalesPorTorneo: RequestHandler = async function (req, res) {
+  try{
+    const participaciones = await buscarParticipacionesPorTorneo(req, res);
+    const participacionesTotales = new Map<number, Participacion>();
+    for (const participacion of participaciones) {
+      const usuario = participacion.usuario;
+      if(!usuario?.id) continue;
+      const usuarioId = usuario.id;
+      if (!participacionesTotales.has(usuarioId)) {
+        participacionesTotales.set(usuarioId, new Participacion());
+      }
+      participacionesTotales.get(usuarioId)?.sumarParticipacion(participacion);
+    }
+    res.status(200).json({
+      message: 'Participaciones totales retrieved successfully',
+      data: Array.from(participacionesTotales.entries()),
+    });
+  } catch (error: any) {
+    console.error('Error in traerParticipacionesTotalesPorTorneo:', error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
 export {
   sanitizeparticipacionInput,
   findAll,
@@ -177,4 +225,6 @@ export {
   remove,
   traerparticipacionesporequipo,
   traerParticipacionesPorUsuarioEnTorneo,
+  traerParticipacionesPorTorneo,
+  traerParticipacionesTotalesPorTorneo,
 };
