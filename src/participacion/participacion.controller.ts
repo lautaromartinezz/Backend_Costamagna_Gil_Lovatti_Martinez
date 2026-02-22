@@ -3,7 +3,6 @@ import { Participacion } from './participacion.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { Equipo } from '../equipo/equipo.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
-import { Populate } from '@mikro-orm/core';
 const em = orm.em;
 
 function sanitizeparticipacionInput(
@@ -179,9 +178,10 @@ const traerParticipacionesPorUsuarioEnTorneo: RequestHandler = async function (
 };
 
 //se puede ver de parametrizar la funcion para poder trabajar con varios populate
-const buscarParticipacionesPorTorneo = async function <
-  p extends Populate<Participacion>,
->(req: Request, res: Response, populate?: p) {
+const buscarParticipacionesPorTorneo = async function (
+  req: Request,
+  res: Response,
+) {
   const idEventoRaw = req.query.eventoId as string;
   const idevento = Number.parseInt(idEventoRaw);
   console.log(`Fetching participaciones for evento ID: ${idevento}`);
@@ -192,7 +192,7 @@ const buscarParticipacionesPorTorneo = async function <
         evento: idevento,
       },
     },
-    { populate: populate ?? (['partido'] as const) },
+    { populate: ['partido', 'usuario.equipos'] },
   );
   return participaciones;
 };
@@ -218,10 +218,7 @@ const traerParticipacionesTotalesPorTorneo: RequestHandler = async function (
   res,
 ) {
   try {
-    const participaciones = await buscarParticipacionesPorTorneo(req, res, [
-      'partido',
-      'usuario.equipos',
-    ] as const);
+    const participaciones = await buscarParticipacionesPorTorneo(req, res);
     const participacionesTotales = new Map<number, Participacion>();
     for (const participacion of participaciones) {
       const usuario = participacion.usuario;
