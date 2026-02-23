@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, request } from 'express';
 import { Usuario } from './usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
-import { FilterQuery } from '@mikro-orm/core';
+import { FilterQuery, PopulateHint } from '@mikro-orm/core';
 import jsonwebtoken from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
@@ -26,7 +26,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
     ultimoLogin:
       req.body.ultimoLogin !== undefined ? req.body.ultimoLogin : null,
   };
-    
+
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
       delete req.body.sanitizedInput[key];
@@ -40,7 +40,7 @@ async function findAll(req: Request, res: Response) {
     const usuarios = await em.find(
       Usuario,
       {},
-      { populate: ['equipos', 'mvps', 'maxAnotador', 'participations'] }
+      { populate: ['equipos', 'mvps', 'maxAnotador', 'participations'] },
     );
     res.status(200).json({
       message: 'Usuarios encontrados satisfactoriamente',
@@ -57,7 +57,7 @@ async function findOne(req: Request, res: Response) {
     const usuario = await em.findOneOrFail(
       Usuario,
       { id },
-      { populate: ['equipos', 'mvps', 'maxAnotador', 'participations'] }
+      { populate: ['equipos', 'mvps', 'maxAnotador', 'participations'] },
     );
     res.status(200).json({ message: 'Usuario encontrado', data: usuario });
   } catch (error: any) {
@@ -70,12 +70,21 @@ async function findSome(req: Request, res: Response) {
     const filter: FilterQuery<Usuario> = {};
 
     const qrol = typeof req.query.rol === 'string' ? req.query.rol : undefined;
-    if (qrol) {filter.role = qrol;}
-    
-    const estado = typeof req.query.estado === 'string' ? req.query.estado : undefined;
+    if (qrol) {
+      filter.role = qrol;
+    }
+
+    const estado =
+      typeof req.query.estado === 'string' ? req.query.estado : undefined;
     let qestado;
-    if (estado == 'Activo') {qestado = true;} else { qestado = false; }
-    if (estado) {filter.estado = qestado;}
+    if (estado == 'Activo') {
+      qestado = true;
+    } else {
+      qestado = false;
+    }
+    if (estado) {
+      filter.estado = qestado;
+    }
 
     const usuarios = await em.find(Usuario, filter);
     res.status(200).json({
@@ -198,7 +207,6 @@ async function loginUsuario(req: Request, res: Response) {
     // Registrar último acceso
     user.ultimoLogin = new Date();
     await em.flush();
-
   } catch (error) {
     res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
   }
@@ -236,7 +244,10 @@ async function restaurarUsuario(req: Request, res: Response) {
       });
 
       const u = await em.findOne(Usuario, { id: payload.id });
-      if (u) { u.ultimoLogin = new Date(); await em.flush(); }
+      if (u) {
+        u.ultimoLogin = new Date();
+        await em.flush();
+      }
 
       return res.json({
         token,
@@ -245,7 +256,6 @@ async function restaurarUsuario(req: Request, res: Response) {
         usuario: payload.usuario,
         email: payload.email,
       });
-      
     } else {
       res.status(401).json({ message: 'Token inválido' });
     }
@@ -269,7 +279,10 @@ function logoutUsuario(req: Request, res: Response) {
 
 async function bajaUsuario(req: Request, res: Response) {
   try {
-    const idRaw = (req.query.id ?? req.params.id ?? req.body.id) as string | number | undefined;
+    const idRaw = (req.query.id ?? req.params.id ?? req.body.id) as
+      | string
+      | number
+      | undefined;
     const id = idRaw !== undefined ? Number.parseInt(String(idRaw), 10) : NaN;
 
     if (!Number.isInteger(id) || Number.isNaN(id)) {
@@ -287,15 +300,21 @@ async function bajaUsuario(req: Request, res: Response) {
     usuarioToBaja.estado = !Boolean(usuarioToBaja.estado);
     await em.flush();
 
-    console.log("Usuario dado de baja/alta:", usuarioToBaja);
+    console.log('Usuario dado de baja/alta:', usuarioToBaja);
     res.status(200).json({
-      message: usuarioToBaja.estado === false ? 'Usuario dado de baja' : 'Usuario reactivado',
-      data: usuarioToBaja
+      message:
+        usuarioToBaja.estado === false
+          ? 'Usuario dado de baja'
+          : 'Usuario reactivado',
+      data: usuarioToBaja,
     });
     return;
   } catch (error: any) {
-    console.error("Error al dar de baja el usuario:", error);
-    res.status(500).json({ message: 'Error al dar de baja el usuario', error: error?.message ?? String(error) });
+    console.error('Error al dar de baja el usuario:', error);
+    res.status(500).json({
+      message: 'Error al dar de baja el usuario',
+      error: error?.message ?? String(error),
+    });
     return;
   }
 }
@@ -320,7 +339,45 @@ async function perfilUsuario(req: Request, res: Response) {
     };
     res.status(200).json({ message: 'Perfil de usuario', data: payload });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el perfil del usuario' + error });
+    res
+      .status(500)
+      .json({ message: 'Error al obtener el perfil del usuario' + error });
+  }
+}
+
+async function findParticipantesEvento(req: Request, res: Response) {
+  try {
+    const idEventoRaw = req.query.eventoId as string;
+    const eventoId = Number.parseInt(idEventoRaw);
+    const usuarios = await em.find(
+      Usuario,
+      {
+        equipos: {
+          evento: eventoId,
+        },
+      },
+      {
+        populate: ['equipos', 'participations.partido'],
+        populateWhere: {
+          equipos: {
+            evento: eventoId,
+          },
+          participations: {
+            partido: {
+              evento: eventoId,
+            },
+          },
+        },
+      },
+    );
+
+    res.status(200).json({
+      message: 'Usuarios retrieved successfully',
+      data: usuarios,
+    });
+  } catch (error: any) {
+    console.error('Error in findParticipantesEvento:', error);
+    res.status(500).json({ message: error.message });
   }
 }
 
@@ -336,5 +393,6 @@ export {
   loginUsuario,
   logoutUsuario,
   restaurarUsuario,
-  perfilUsuario
+  perfilUsuario,
+  findParticipantesEvento,
 };
