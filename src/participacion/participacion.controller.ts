@@ -3,6 +3,8 @@ import { Participacion } from './participacion.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { Equipo } from '../equipo/equipo.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
+import { ParticipacionTotalDTO } from './dto/participacionDTO.js';
+
 const em = orm.em;
 
 function sanitizeparticipacionInput(
@@ -219,35 +221,45 @@ const traerParticipacionesTotalesPorTorneo: RequestHandler = async function (
 ) {
   try {
     const participaciones = await buscarParticipacionesPorTorneo(req, res);
-    const participacionesTotales = new Map<number, Participacion>();
+    const participacionesTotales = new Map<number, ParticipacionTotalDTO>();
     for (const participacion of participaciones) {
       const usuario = participacion.usuario;
       if (!usuario?.id) continue;
       const usuarioId = usuario.id;
       if (!participacionesTotales.has(usuarioId)) {
-        const p = new Participacion();
-        p.usuario = usuario;
-        participacionesTotales.set(usuarioId, p);
+        const equipo = usuario.getEquipoEvento(
+          Number.parseInt(req.query.eventoId as string),
+        );
+        participacionesTotales.set(usuarioId, {
+          usuario: {
+            id: usuario.id,
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            equipos: equipo
+              ? [
+                  {
+                    id: equipo.id!,
+                    nombre: equipo.nombre,
+                  },
+                ]
+              : [],
+          },
+          puntos: 0,
+          faltas: 0,
+          minutosjugados: 0,
+        });
       }
-      participacionesTotales.get(usuarioId)?.sumarParticipacion(participacion);
+      const acumulado = participacionesTotales.get(usuarioId)!;
+
+      acumulado.puntos += participacion.puntos ?? 0;
+      acumulado.faltas += participacion.faltas ?? 0;
+      acumulado.minutosjugados += participacion.minutosjugados ?? 0;
     }
     res.status(200).json({
       message: 'Participaciones totales retrieved successfully',
-      data: Array.from(participacionesTotales.values()).map((p) => ({
-        puntos: p.puntos,
-        minutosjugados: p.minutosjugados,
-        faltas: p.faltas,
-        usuario: {
-          id: p.usuario!.id,
-          nombre: p.usuario!.nombre,
-          apellido: p.usuario!.apellido,
-          equipos: [
-            p.usuario!.getEquipoEvento(
-              Number.parseInt(req.query.eventoId as string),
-            ),
-          ],
-        },
-      })),
+      data: Array.from(participacionesTotales.values()).sort(
+        (a, b) => b.puntos - a.puntos,
+      ),
     });
   } catch (error: any) {
     console.error('Error in traerParticipacionesTotalesPorTorneo:', error);
