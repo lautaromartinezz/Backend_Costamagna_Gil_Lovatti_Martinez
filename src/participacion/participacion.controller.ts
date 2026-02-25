@@ -143,6 +143,31 @@ const traerparticipacionesporequipo: RequestHandler = async function (
   }
 };
 
+const traerParticipacionesPorUsuarioEnTorneo: RequestHandler = async function (req, res) {
+  try {
+    const usuarioIdRaw = req.query.usuarioId as string;
+    const idEventoRaw = req.query.eventoId as string;
+    const usuarioId = Number.parseInt(usuarioIdRaw);
+    const idevento = Number.parseInt(idEventoRaw);
+    console.log(`Fetching participaciones for usuario ID: ${usuarioId} in evento ID: ${idevento}`);
+
+    const participaciones = await em.find(Participacion, {
+      usuario: usuarioId,
+      partido: {
+        evento: idevento,
+      },
+    }, { populate: ['partido'] });
+    
+    res.status(200).json({
+      message: 'Participaciones retrieved successfully',
+      data: participaciones,
+    });
+  } catch (error: any) {
+    console.error('Error in traerParticipacionesPorUsuarioEnTorneo:', error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
 export {
   sanitizeparticipacionInput,
   findAll,
