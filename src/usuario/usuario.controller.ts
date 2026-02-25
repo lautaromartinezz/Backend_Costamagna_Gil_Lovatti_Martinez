@@ -123,8 +123,32 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
+    const input = req.body.sanitizedInput;
+
+    if (input.usuario) {
+      const existsUser = await em.findOne(Usuario, {
+        usuario: input.usuario,
+        id: { $ne: id },
+      });
+      if (existsUser) {
+        res.status(409).json({ message: 'Nombre de usuario no disponible' });
+        return;
+      }
+    }
+
+    if (input.email) {
+      const existsEmail = await em.findOne(Usuario, {
+        email: input.email,
+        id: { $ne: id },
+      });
+      if (existsEmail) {
+        res.status(409).json({ message: 'El email ya está registrado' });
+        return;
+      }
+    }
+
     const usuarioToUpdate = await em.findOneOrFail(Usuario, { id });
-    em.assign(usuarioToUpdate, req.body.sanitizedInput);
+    em.assign(usuarioToUpdate, input);
     await em.flush();
     res
       .status(200)
