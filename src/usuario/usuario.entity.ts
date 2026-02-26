@@ -69,4 +69,12 @@ export class Usuario extends BaseEntity {
     cascade: [Cascade.ALL],
   })
   eventos = new Collection<Evento>(this);
+
+  getEquipoEvento(idEvento: number) {
+    for (let equipo of this.equipos) {
+      if ((equipo.evento.id = idEvento)) {
+        return equipo;
+      }
+    }
+  }
 }
