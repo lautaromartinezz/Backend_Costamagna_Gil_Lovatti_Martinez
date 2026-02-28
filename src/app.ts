@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import 'dotenv/config';
 import { deporteRouter } from './deporte/deporte.routes.js';
 import { establecimientoRouter } from './establecimiento/establecimiento.routes.js';
 import { orm, syncSchema } from './shared/db/orm.js';
@@ -14,6 +15,7 @@ import { usuarioRouter } from './usuario/usuario.routes.js';
 import { participacionRouter } from './participacion/participacion.routes.js';
 import { localidadRouter } from './localidad/localidad.routes.js';
 import { adminRouter } from './admin/admin.routes.js';
+import { invitacionRouter } from './invitacion/invitacion.routes.js';
 
 const app = express();
 app.use(express.json());
@@ -23,7 +25,7 @@ app.use(
   cors({
     origin: 'http://localhost:5173', // o el origen de tu frontend
     credentials: true,
-  })
+  }),
 ); // 👈 Esto permite todas las conexiones (ideal para desarrollo)
 
 app.use((req, res, next) => {
@@ -48,6 +50,8 @@ app.use('/api/participaciones', participacionRouter);
 app.use('/api/localidades', localidadRouter);
 
 app.use('/api/admin', adminRouter);
+
+app.use('/api/invitaciones', invitacionRouter);
 
 app.use((_, res) => {
   res.status(404).send({ message: 'Resource not found' });
