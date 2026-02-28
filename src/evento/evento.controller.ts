@@ -53,7 +53,7 @@ async function findAll(req: Request, res: Response) {
           'partidos.equipoVisitante',
           'partidos.establecimiento',
         ],
-      }
+      },
     );
     res
       .status(200)
@@ -84,7 +84,7 @@ async function findOne(req: Request, res: Response) {
           'partidos.equipoVisitante',
           'partidos.establecimiento',
         ],
-      }
+      },
     );
     res.status(200).json({ message: 'found evento', data: evento });
   } catch (error: any) {
@@ -165,7 +165,7 @@ async function update(req: Request, res: Response) {
     const eventoToUpdate = await em.findOneOrFail(
       Evento,
       { id },
-      { populate: ['creador'] }
+      { populate: ['creador'] },
     );
 
     if (eventoToUpdate.creador.id !== userId) {
@@ -206,7 +206,7 @@ async function remove(req: Request, res: Response) {
     const evento = await em.findOneOrFail(
       Evento,
       { id },
-      { populate: ['creador', 'equipos', 'partidos', 'establecimientos'] }
+      { populate: ['creador', 'equipos', 'partidos', 'establecimientos'] },
     );
 
     if (evento.creador.id !== userId) {
@@ -317,7 +317,7 @@ async function findXCreator(req: Request, res: Response) {
     const eventos = await em.find(
       Evento,
       { creador: { id: userId } },
-      { populate: ['deporte', 'localidad', 'creador'] }
+      { populate: ['deporte', 'localidad', 'creador'] },
     );
     res.status(200).json({ message: 'Eventos del creador', data: eventos });
   } catch (error: any) {
@@ -335,7 +335,7 @@ async function findXParticipant(req: Request, res: Response) {
     const eventos = await em.find(
       Evento,
       { equipos: { miembros: { id: userId } } },
-      { populate: ['deporte', 'localidad', 'equipos.miembros'] }
+      { populate: ['deporte', 'localidad', 'equipos.miembros'] },
     );
 
     res

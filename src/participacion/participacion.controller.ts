@@ -267,6 +267,48 @@ const traerParticipacionesTotalesPorTorneo: RequestHandler = async function (
   }
 };
 
+const traerParticipacionesPorUsuario: RequestHandler = async function (
+  req,
+  res,
+) {
+  try {
+    const usuarioIdRaw = req.query.usuarioId as string;
+    const usuarioId = Number.parseInt(usuarioIdRaw);
+
+    if (Number.isNaN(usuarioId)) {
+      res.status(400).json({ message: 'usuarioId inválido' });
+      return;
+    }
+
+    const participaciones = await em.find(
+      Participacion,
+      {
+        usuario: usuarioId,
+      },
+      {
+        populate: [
+          'usuario',
+          'partido',
+          'partido.evento',
+          'partido.evento.deporte',
+          'partido.fecha',
+          'partido.equipoLocal',
+          'partido.equipoVisitante',
+          'partido.equipoLocal',
+        ],
+      },
+    );
+
+    res.status(200).json({
+      message: 'Participaciones retrieved successfully',
+      data: participaciones,
+    });
+  } catch (error: any) {
+    console.error('Error in traerParticipacionesPorUsuario:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export {
   sanitizeparticipacionInput,
   findAll,
@@ -278,4 +320,5 @@ export {
   traerParticipacionesPorUsuarioEnTorneo,
   traerParticipacionesPorTorneo,
   traerParticipacionesTotalesPorTorneo,
+  traerParticipacionesPorUsuario,
 };

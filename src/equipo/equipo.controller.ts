@@ -40,7 +40,7 @@ async function findAll(req: Request, res: Response) {
           'partidoLocal',
           'evento.deporte',
         ],
-      }
+      },
     );
     res.status(200).json({
       message: 'Equipos encontrados satisfactoriamente',
@@ -66,7 +66,7 @@ async function findOne(req: Request, res: Response) {
           'evento.deporte',
           'capitan',
         ],
-      }
+      },
     );
     res.status(200).json({ message: 'Equipo encontrado', data: equipo });
   } catch (error: any) {
@@ -105,6 +105,30 @@ async function add(req: Request, res: Response) {
       });
       return;
     }
+
+    const capitanId = sanitizedInput.capitan;
+    if (capitanId) {
+      const equipos = await em.find(
+        Equipo,
+        { evento: evento.id },
+        { populate: ['miembros', 'capitan'] },
+      );
+
+      const estaenotroequipo = equipos.some((equipo) => {
+        const esCapitan = (equipo.capitan as any)?.id === capitanId;
+        if (esCapitan) return true;
+        const miembros = equipo.miembros.getItems();
+        return miembros.some((miembro) => miembro.id === capitanId);
+      });
+
+      if (estaenotroequipo) {
+        res.status(400).json({
+          message: 'El capitan ya está en otro equipo del mismo evento',
+        });
+        return;
+      }
+    }
+
     const equipo = em.create(Equipo, req.body.sanitizedInput);
     await em.flush();
     res.status(201).json({ message: 'Equipo creado', data: equipo });
@@ -141,7 +165,7 @@ async function remove(req: Request, res: Response) {
           'partidoLocal',
           'partidoVisitante',
         ],
-      }
+      },
     );
     em.remove(equipoToRemove);
     await em.flush();
@@ -163,7 +187,15 @@ async function postAddMember(req: Request, res: Response) {
     const equipo = await em.findOneOrFail(
       Equipo,
       { id: equipoId },
-      { populate: ['miembros', 'evento', 'evento.deporte'] }
+      {
+        populate: [
+          'miembros',
+          'evento',
+          'evento.deporte',
+          'evento.equipos.miembros',
+          'evento.equipos.capitan',
+        ],
+      },
     );
     const fechaini = (equipo as any).evento?.fechaInicioInscripcion;
     const fechafin = (equipo as any).evento?.fechaFinInscripcion;
@@ -194,6 +226,33 @@ async function postAddMember(req: Request, res: Response) {
       return;
     }
 
+    const evento = equipo.evento as any;
+    const equiposDelEvento = evento?.equipos?.getItems() || [];
+
+    for (const otroEquipo of equiposDelEvento) {
+      if (otroEquipo.id !== equipoId) {
+        const esCapitan = (otroEquipo.capitan as any)?.id === usuarioId;
+        if (esCapitan) {
+          res.status(400).json({
+            message: 'Usuario ya es capitán de otro equipo en este evento',
+          });
+          return;
+        }
+
+        const miembrosDelOtroEquipo = otroEquipo.miembros?.getItems() || [];
+        const estaEnOtroEquipo = miembrosDelOtroEquipo.some(
+          (miembro: any) => miembro.id === usuarioId,
+        );
+
+        if (estaEnOtroEquipo) {
+          res.status(400).json({
+            message: 'Usuario ya es miembro de otro equipo en este evento',
+          });
+          return;
+        }
+      }
+    }
+
     if (!equipo.miembros.contains(usuario)) {
       equipo.miembros.add(usuario);
       await em.flush();
@@ -214,7 +273,7 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
       '[deleteSelf] called, equipo id=',
       id,
       'req.user=',
-      (req as any).user
+      (req as any).user,
     );
 
     const requester = (req as any).user;
@@ -231,7 +290,7 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
     const equipo = await em.findOneOrFail(
       Equipo,
       { id },
-      { populate: ['miembros', 'capitan'] }
+      { populate: ['miembros', 'capitan'] },
     );
     const targetId =
       usuarioId !== undefined && usuarioId !== null
@@ -277,7 +336,7 @@ async function deleteSelfFromMembers(req: Request, res: Response) {
     const updated = await em.findOne(
       Equipo,
       { id },
-      { populate: ['miembros', 'capitan'] }
+      { populate: ['miembros', 'capitan'] },
     );
     const message =
       targetId === requesterId
@@ -298,7 +357,7 @@ async function findAllByEvento(req: Request, res: Response) {
     const equipos = await em.find(
       Equipo,
       { evento: eventoId },
-      { populate: ['miembros', 'evento'] }
+      { populate: ['miembros', 'evento'] },
     );
     res
       .status(200)
