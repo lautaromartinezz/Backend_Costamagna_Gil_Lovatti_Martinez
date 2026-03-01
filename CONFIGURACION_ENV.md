@@ -21,6 +21,8 @@ Edita el archivo `.env` con tus valores reales:
 #### **JWT_SECRET** (CRÍTICO)
 Esta es la clave para firmar tus tokens de autenticación. NUNCA uses la clave por defecto en producción.
 
+> 📖 **Lectura recomendada**: Ver [JWT_SECURITY.md](JWT_SECURITY.md) para entender cómo funciona JWT y por qué es crítico para la seguridad.
+
 **Generar una clave segura:**
 ```bash
 # Opción 1: Node.js

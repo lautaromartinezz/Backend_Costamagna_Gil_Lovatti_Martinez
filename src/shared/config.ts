@@ -71,5 +71,10 @@ export function validateConfig(): void {
     );
   }
 
+  // Información útil en desarrollo
+  if (config.isDevelopment()) {
+    console.log(`📦 Base de datos: ${config.DB.USER}@${config.DB.HOST}:${config.DB.PORT}/${config.DB.NAME}`);
+  }
+
   console.log('✅ Configuración validada correctamente');
 }
