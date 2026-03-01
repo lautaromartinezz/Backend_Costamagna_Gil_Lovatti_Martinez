@@ -4,6 +4,7 @@ import { orm } from '../shared/db/orm.js';
 import { FilterQuery, PopulateHint } from '@mikro-orm/core';
 import jsonwebtoken from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { config } from '../shared/config.js';
 
 const em = orm.em;
 
@@ -179,8 +180,6 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_para_dev'; // Lo ideal es usar process.env.JWT_SECRET, hay que setear la variable de entorno
-
 async function loginUsuario(req: Request, res: Response) {
   const { usuario, contraseña, remember } = req.body;
   const userRepo = em.getRepository(Usuario);
@@ -205,9 +204,9 @@ async function loginUsuario(req: Request, res: Response) {
     };
 
     // Creamos los token
-    const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+    const token = jsonwebtoken.sign(payload, config.JWT.SECRET, { expiresIn: '1h' });
     if (remember) {
-      const recuerdame = jsonwebtoken.sign(payload, JWT_SECRET, {
+      const recuerdame = jsonwebtoken.sign(payload, config.JWT.SECRET, {
         expiresIn: '7d',
       });
       res.cookie('recuerdame', recuerdame, {
@@ -241,7 +240,7 @@ async function restaurarUsuario(req: Request, res: Response) {
     return res.status(401).json({ message: 'No autorizado' });
   }
   try {
-    const decoded = jsonwebtoken.verify(recuerdame, JWT_SECRET);
+    const decoded = jsonwebtoken.verify(recuerdame, config.JWT.SECRET);
     if (
       typeof decoded === 'object' &&
       'ip' in decoded &&
@@ -259,7 +258,7 @@ async function restaurarUsuario(req: Request, res: Response) {
         role: decoded.role,
         ip: req.ip,
       };
-      const token = jsonwebtoken.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+      const token = jsonwebtoken.sign(payload, config.JWT.SECRET, { expiresIn: '1h' });
       res.cookie('recuerdame', recuerdame, {
         httpOnly: true,
         secure: false,

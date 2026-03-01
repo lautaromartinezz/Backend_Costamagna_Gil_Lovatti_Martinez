@@ -3,6 +3,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
+import { config, validateConfig } from './shared/config.js';
 import { deporteRouter } from './deporte/deporte.routes.js';
 import { establecimientoRouter } from './establecimiento/establecimiento.routes.js';
 import { orm, syncSchema } from './shared/db/orm.js';
@@ -23,10 +24,10 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: 'http://localhost:5173', // o el origen de tu frontend
+    origin: config.FRONTEND_URL,
     credentials: true,
   }),
-); // 👈 Esto permite todas las conexiones (ideal para desarrollo)
+);
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
@@ -57,8 +58,12 @@ app.use((_, res) => {
   res.status(404).send({ message: 'Resource not found' });
 });
 
+// Validar configuración antes de iniciar
+validateConfig();
+
 await syncSchema();
 
-app.listen(3000, () => {
-  console.log('Server runnning on http://localhost:3000/');
+app.listen(config.PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${config.PORT}/`);
+  console.log(`Environment: ${config.NODE_ENV}`);
 });

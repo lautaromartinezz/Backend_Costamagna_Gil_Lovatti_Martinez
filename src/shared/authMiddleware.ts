@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { config } from './config.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_para_dev';
+const JWT_SECRET = config.JWT.SECRET;
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];

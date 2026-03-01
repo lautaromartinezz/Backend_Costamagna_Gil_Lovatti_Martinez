@@ -1,9 +1,11 @@
 import { Resend } from 'resend';
 import crypto from 'crypto';
+import { config } from '../shared/config.js';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = config.EMAIL.API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const FRONTEND_URL = config.FRONTEND_URL;
 
 interface InvitationEmailParams {
   to: string;
@@ -21,6 +23,14 @@ export async function sendInvitationEmail({
   invitationToken,
 }: InvitationEmailParams): Promise<{ success: boolean; error?: string }> {
   try {
+    if (!resend) {
+      return {
+        success: false,
+        error:
+          'Falta configurar RESEND_API_KEY en el backend (.env). No se puede enviar el email.',
+      };
+    }
+
     const invitationLink = `${FRONTEND_URL}/unirse-equipo?token=${invitationToken}`;
 
     const { data, error } = await resend.emails.send({
