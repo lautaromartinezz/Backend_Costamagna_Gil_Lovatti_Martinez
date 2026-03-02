@@ -22,10 +22,14 @@ export const config = {
     EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
   },
 
-  // Email (Resend)
+  // Email (Gmail SMTP)
   EMAIL: {
-    API_KEY: process.env.RESEND_API_KEY,
-    FROM: process.env.EMAIL_FROM || 'noreply@tudominio.com',
+    // Configuración Gmail SMTP
+    GMAIL_USER: process.env.GMAIL_USER,
+    GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD,
+    FROM: process.env.EMAIL_FROM || 'noreply@gmail.com',
+    // Configuración legacy (Resend) - mantener por compatibilidad
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
   },
 
   // URLs
@@ -56,8 +60,10 @@ export function validateConfig(): void {
     missingVars.push('JWT_SECRET');
   }
 
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('⚠️ RESEND_API_KEY no configurada - emails deshabilitados');
+  if (!process.env.RESEND_API_KEY && !process.env.GMAIL_APP_PASSWORD) {
+    console.warn(
+      '⚠️ No hay configuración de email (GMAIL_APP_PASSWORD o RESEND_API_KEY) - emails deshabilitados',
+    );
   }
 
   if (!process.env.DB_NAME) {
@@ -67,13 +73,15 @@ export function validateConfig(): void {
   if (missingVars.length > 0) {
     throw new Error(
       `❌ Variables de entorno faltantes: ${missingVars.join(', ')}\n` +
-      `Por favor, configura estas variables en tu archivo .env`
+        `Por favor, configura estas variables en tu archivo .env`,
     );
   }
 
   // Información útil en desarrollo
   if (config.isDevelopment()) {
-    console.log(`📦 Base de datos: ${config.DB.USER}@${config.DB.HOST}:${config.DB.PORT}/${config.DB.NAME}`);
+    console.log(
+      `📦 Base de datos: ${config.DB.USER}@${config.DB.HOST}:${config.DB.PORT}/${config.DB.NAME}`,
+    );
   }
 
   console.log('✅ Configuración validada correctamente');

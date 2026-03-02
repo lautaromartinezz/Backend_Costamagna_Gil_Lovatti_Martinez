@@ -1,11 +1,25 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { config } from '../shared/config.js';
 
-const resendApiKey = config.EMAIL.API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
+// Configuración del transporter de Gmail
+const gmailUser = config.EMAIL.GMAIL_USER;
+const gmailAppPassword = config.EMAIL.GMAIL_APP_PASSWORD;
+
+// Crear transporter de nodemailer para Gmail SMTP
+const transporter =
+  gmailUser && gmailAppPassword
+    ? nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: gmailUser,
+          pass: gmailAppPassword,
+        },
+      })
+    : null;
 
 const FRONTEND_URL = config.FRONTEND_URL;
+const EMAIL_FROM = config.EMAIL.FROM;
 
 interface InvitationEmailParams {
   to: string;
@@ -23,19 +37,19 @@ export async function sendInvitationEmail({
   invitationToken,
 }: InvitationEmailParams): Promise<{ success: boolean; error?: string }> {
   try {
-    if (!resend) {
+    if (!transporter) {
       return {
         success: false,
         error:
-          'Falta configurar RESEND_API_KEY en el backend (.env). No se puede enviar el email.',
+          'Falta configurar GMAIL_USER y GMAIL_APP_PASSWORD en el backend (.env). No se puede enviar el email.',
       };
     }
 
     const invitationLink = `${FRONTEND_URL}/unirse-equipo?token=${invitationToken}`;
 
-    const { data, error } = await resend.emails.send({
-      from: 'Gestor Torneos <onboarding@resend.dev>',
-      to: [to],
+    const info = await transporter.sendMail({
+      from: `"Gestor Torneos" <${EMAIL_FROM}>`,
+      to: to,
       subject: `Invitación para unirte al equipo "${teamName}"`,
       html: `
         <!DOCTYPE html>
