@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/db/orm.js';
 import { Evento } from './evento.entity.js';
 import { Deporte } from '../deporte/deporte.entity.js';
-import { FilterQuery } from '@mikro-orm/core';
+import { FilterQuery, NotFoundError } from '@mikro-orm/core';
 
 import { EntityManager } from '@mikro-orm/mysql';
 import { randomInt } from 'crypto';
@@ -88,6 +88,17 @@ async function findOne(req: Request, res: Response) {
     );
     res.status(200).json({ message: 'found evento', data: evento });
   } catch (error: any) {
+    const message = String(error?.message ?? '');
+    const isNotFound =
+      error instanceof NotFoundError ||
+      error?.name === 'NotFoundError' ||
+      /not found|no\s+\w+\s+entity\s+found/i.test(message);
+
+    if (isNotFound) {
+      res.status(404).json({ message: 'Evento no encontrado' });
+      return;
+    }
+
     res.status(500).json({ message: error.message });
   }
 }

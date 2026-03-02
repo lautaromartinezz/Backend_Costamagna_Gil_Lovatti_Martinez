@@ -89,7 +89,6 @@ export async function sendInvitationEmail({
       return { success: false, error: error.message };
     }
 
-    console.log('Email sent successfully:', data);
     return { success: true };
   } catch (error: any) {
     console.error('Error sending email:', error);

@@ -59,21 +59,6 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-// async function add(req: Request, res: Response) {
-//   try {
-//     const localidad = em.create(Localidad, req.body.sanitizedInput);
-//     const existe = await em.findOne(Localidad, { descripcion: localidad.descripcion })
-//     if (existe) {
-//       res.status(400).json({ message: 'La localidad ya existe' });
-//       return;
-//     }
-//     await em.flush();
-//     res.status(201).json({ message: 'Localidad creada', data: localidad });
-//   } catch (error: any) {
-//     res.status(500).json({ message: 'Error al crear la localidad' });
-//   }
-// }
-
 async function add(req: Request, res: Response) {
   const em = orm.em.fork();
   try {

@@ -322,8 +322,6 @@ async function bajaUsuario(req: Request, res: Response) {
     // toggle estado
     usuarioToBaja.estado = !Boolean(usuarioToBaja.estado);
     await em.flush();
-
-    console.log('Usuario dado de baja/alta:', usuarioToBaja);
     res.status(200).json({
       message:
         usuarioToBaja.estado === false

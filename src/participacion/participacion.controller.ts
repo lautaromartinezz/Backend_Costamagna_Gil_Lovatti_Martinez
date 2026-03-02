@@ -109,20 +109,17 @@ const traerparticipacionesporequipo: RequestHandler = async function (
     const idpartido = Number.parseInt(partidoIdRaw);
     const equipoid = Number.parseInt(equipoIdRaw);
 
-    console.log(`Fetching equipo with ID: ${equipoid}`);
     const equipo = await em.findOneOrFail(
       Equipo,
       { id: equipoid },
       { populate: ['miembros'] },
     );
 
-    console.log(`Equipo fetched successfully:`, equipo);
     const miembroIds = equipo.miembros
       .getItems()
       .map((miembro) => miembro.id)
       .filter((id): id is number => id !== undefined);
 
-    console.log(`Member IDs extracted:`, miembroIds);
 
     const participaciones = await em.find(
       Participacion,
@@ -132,8 +129,6 @@ const traerparticipacionesporequipo: RequestHandler = async function (
       },
       { populate: ['usuario'] },
     );
-
-    console.log(`Participaciones fetched successfully:`, participaciones);
 
     res.status(200).json({
       message: 'Participaciones retrieved successfully',
@@ -154,9 +149,6 @@ const traerParticipacionesPorUsuarioEnTorneo: RequestHandler = async function (
     const idEventoRaw = req.query.eventoId as string;
     const usuarioId = Number.parseInt(usuarioIdRaw);
     const idevento = Number.parseInt(idEventoRaw);
-    console.log(
-      `Fetching participaciones for usuario ID: ${usuarioId} in evento ID: ${idevento}`,
-    );
 
     const participaciones = await em.find(
       Participacion,
@@ -186,7 +178,6 @@ const buscarParticipacionesPorTorneo = async function (
 ) {
   const idEventoRaw = req.query.eventoId as string;
   const idevento = Number.parseInt(idEventoRaw);
-  console.log(`Fetching participaciones for evento ID: ${idevento}`);
   const participaciones = await em.find(
     Participacion,
     {

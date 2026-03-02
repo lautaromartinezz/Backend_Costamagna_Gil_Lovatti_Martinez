@@ -269,12 +269,6 @@ async function postAddMember(req: Request, res: Response) {
 async function deleteSelfFromMembers(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
-    console.log(
-      '[deleteSelf] called, equipo id=',
-      id,
-      'req.user=',
-      (req as any).user,
-    );
 
     const requester = (req as any).user;
     if (!requester?.id)

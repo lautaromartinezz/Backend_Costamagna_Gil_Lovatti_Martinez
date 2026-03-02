@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Noticia } from './noticia.entity.js';
 import { orm } from '../shared/db/orm.js';
-import { FilterQuery } from '@mikro-orm/core';
+import { FilterQuery, NotFoundError } from '@mikro-orm/core';
 
 const em = orm.em;
 
@@ -43,6 +43,16 @@ async function findOne(req: Request, res: Response) {
     const noticia = await em.findOneOrFail(Noticia, { id });
     res.status(200).json({ message: 'found noticia', data: noticia });
   } catch (error: any) {
+    const message = String(error?.message ?? '');
+    const isNotFound =
+      error instanceof NotFoundError ||
+      error?.name === 'NotFoundError' ||
+      /not found|no\s+\w+\s+entity\s+found/i.test(message);
+
+    if (isNotFound) {
+      res.status(404).json({ message: 'Noticia no encontrada' });
+      return;
+    }
     res.status(500).json({ message: error.message });
   }
 }
