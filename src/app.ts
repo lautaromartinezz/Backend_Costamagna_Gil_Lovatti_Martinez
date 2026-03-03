@@ -1,6 +1,9 @@
 import 'reflect-metadata';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import 'dotenv/config';
+import { config, validateConfig } from './shared/config.js';
 import { deporteRouter } from './deporte/deporte.routes.js';
 import { establecimientoRouter } from './establecimiento/establecimiento.routes.js';
 import { orm, syncSchema } from './shared/db/orm.js';
@@ -11,11 +14,20 @@ import { partidoRouter } from './evento/partido.routers.js';
 import { equipoRouter } from './equipo/equipo.routes.js';
 import { usuarioRouter } from './usuario/usuario.routes.js';
 import { participacionRouter } from './participacion/participacion.routes.js';
+import { localidadRouter } from './localidad/localidad.routes.js';
+import { adminRouter } from './admin/admin.routes.js';
+import { invitacionRouter } from './invitacion/invitacion.routes.js';
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
-app.use(cors()); // 👈 Esto permite todas las conexiones (ideal para desarrollo)
+app.use(
+  cors({
+    origin: config.FRONTEND_URL,
+    credentials: true,
+  }),
+);
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
@@ -34,14 +46,24 @@ app.use('/api/equipos', equipoRouter);
 
 app.use('/api/usuarios', usuarioRouter);
 
-app.use('/api/participacions', participacionRouter);
+app.use('/api/participaciones', participacionRouter);
+
+app.use('/api/localidades', localidadRouter);
+
+app.use('/api/admin', adminRouter);
+
+app.use('/api/invitaciones', invitacionRouter);
 
 app.use((_, res) => {
   res.status(404).send({ message: 'Resource not found' });
 });
 
+// Validar configuración antes de iniciar
+validateConfig();
+
 await syncSchema();
 
-app.listen(3000, () => {
-  console.log('Server runnning on http://localhost:3000/');
+app.listen(config.PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${config.PORT}/`);
+  console.log(`Environment: ${config.NODE_ENV}`);
 });

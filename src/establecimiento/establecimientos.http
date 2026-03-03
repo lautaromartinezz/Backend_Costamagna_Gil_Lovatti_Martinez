@@ -40,3 +40,6 @@ Content-Type: application/json
 
 ### borrar un establecimiento
 DELETE http://localhost:3000/api/establecimientos/{{id}}
+
+### obtener todos los establecimientos de un evento
+GET http://localhost:3000/api/establecimientos/evento/1

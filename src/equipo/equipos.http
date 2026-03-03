@@ -10,8 +10,9 @@ Content-Type: application/json
   "nombre" : "Real Madrid",
   "nombreCapitan" : "Daniel Carvajal",
   "puntos" : 999,
+  "capitan" : 1,
   "esPublico": true,
-  "contraseña": "1234",
+  "contrasenia": "1234",
   "evento": 1,
   "miembros" : [1] 
 }
@@ -31,7 +32,7 @@ Content-Type: application/json
   "capitan":"Marc Andre ter Stegen",
   "puntos": 0,
   "esPublico": true,
-  "contraseña": "1234"
+  "contrasenia": "1234"
 }
 
 ### modificar un equipo (PATCH - recurso parcial)
@@ -43,8 +44,11 @@ Content-Type: application/json
   "capitan" : "Sergio Aguza",
   "puntos" : 500,
   "esPublico": false,
-  "contraseña": "1234"
+  "contrasenia": "1234"
 }
 
 ### borrar un equipo
 DELETE http://localhost:3000/api/equipos/{{id}}
+
+### obtener equipos de usuario
+GET http://localhost:3000/api/equipos/usuario/6

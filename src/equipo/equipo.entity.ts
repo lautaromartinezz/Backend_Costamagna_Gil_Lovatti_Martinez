@@ -27,8 +27,8 @@ export class Equipo extends BaseEntity {
   @Property({ nullable: false })
   esPublico!: boolean;
 
-  @Property({ nullable: false })
-  contraseña!: string;
+  @Property({ nullable: true })
+  contrasenia!: string;
 
   @ManyToMany(() => Usuario)
   miembros = new Collection<Usuario>(this);
@@ -36,15 +36,18 @@ export class Equipo extends BaseEntity {
   @ManyToOne(() => Evento, { nullable: false })
   evento!: Rel<Evento>;
 
-  @OneToMany(() => Partido,(partido) => partido.equipoVisitante, {
+  @OneToMany(() => Partido, (partido) => partido.equipoVisitante, {
     nullable: true,
     cascade: [Cascade.ALL],
   })
-  partidoVisitante?= new Collection<Partido>(this);
+  partidoVisitante? = new Collection<Partido>(this);
 
- @OneToMany(() => Partido,(partido) => partido.equipoLocal, {
+  @OneToMany(() => Partido, (partido) => partido.equipoLocal, {
     nullable: true,
     cascade: [Cascade.ALL],
   })
-  partidoLocal?= new Collection<Partido>(this);
+  partidoLocal? = new Collection<Partido>(this);
+
+  @ManyToOne(() => Usuario, { nullable: false })
+  capitan!: Rel<Usuario>;
 }

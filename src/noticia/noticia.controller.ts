@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Noticia } from './noticia.entity.js';
 import { orm } from '../shared/db/orm.js';
+import { FilterQuery, NotFoundError } from '@mikro-orm/core';
 
 const em = orm.em;
 
@@ -8,6 +9,7 @@ function sanitizeNoticiaInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     titulo: req.body.titulo,
     descripcion: req.body.descripcion,
+    fecha: req.body.fecha,
     id: req.body.id,
   };
   //more checks here
@@ -22,7 +24,9 @@ function sanitizeNoticiaInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const noticias = await em.find(Noticia, {});
+    const orderParam = String(req.query.order || 'desc').toLowerCase();
+    const order: 'asc' | 'desc' = orderParam === 'asc' ? 'asc' : 'desc';
+    const noticias = await em.find(Noticia, {}, { orderBy: { fecha: order } });
     res
       .status(200)
       .json({ message: 'Noticias retrieved successfully', data: noticias });
@@ -39,6 +43,16 @@ async function findOne(req: Request, res: Response) {
     const noticia = await em.findOneOrFail(Noticia, { id });
     res.status(200).json({ message: 'found noticia', data: noticia });
   } catch (error: any) {
+    const message = String(error?.message ?? '');
+    const isNotFound =
+      error instanceof NotFoundError ||
+      error?.name === 'NotFoundError' ||
+      /not found|no\s+\w+\s+entity\s+found/i.test(message);
+
+    if (isNotFound) {
+      res.status(404).json({ message: 'Noticia no encontrada' });
+      return;
+    }
     res.status(500).json({ message: error.message });
   }
 }
@@ -77,4 +91,48 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeNoticiaInput, findAll, findOne, add, update, remove };
+async function findSome(req: Request, res: Response) {
+  try {
+    const filter: FilterQuery<Noticia> = {};
+
+    const qDesde = typeof req.query.fechaDesde === 'string' ? req.query.fechaDesde : undefined;
+    const qHasta = typeof req.query.fechaHasta === 'string' ? req.query.fechaHasta : undefined;
+
+    const parseLocalDay = (s: string) => {
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return null;
+      d.setHours(0, 0, 0, 0);
+      const end = new Date(d);
+      end.setDate(end.getDate() + 1); // exclusivo
+      return { start: d, end };
+    };
+    
+    const range: Record<string, Date> = {};
+    
+    if (qDesde) {
+      const r = parseLocalDay(qDesde);
+      if (!r){ 
+        res.status(400).json({ message: 'Parametro fechaDesde inválido (YYYY-MM-DD)' });
+        return;
+      }
+      range.$gte = r.start;
+    }
+    if (qHasta) {
+      const r = parseLocalDay(qHasta);
+      if (!r) {
+        res.status(400).json({ message: 'Parametro fechaHasta inválido (YYYY-MM-DD)' });
+        return;
+      }
+      range.$lt = r.end; // incluye todo el día de fechaHasta
+    }
+    if (Object.keys(range).length) filter.fecha = range as any;
+
+    const noticias = await em.find(Noticia, filter, { orderBy: { fecha: 'desc' } });
+    res.status(200).json({ message: 'Noticias filtradas', data: noticias });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error filtrando noticias', error: error.message });
+  }
+}
+
+
+export { sanitizeNoticiaInput, findAll, findOne, add, update, remove, findSome };

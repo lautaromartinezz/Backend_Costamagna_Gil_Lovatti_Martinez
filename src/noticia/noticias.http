@@ -1,5 +1,12 @@
-### GET all noticias
+### GET all noticias (desc by default)
 http://localhost:3000/api/noticias
+
+### GET noticias con filtros
+http://localhost:3000/api/noticias/filter?fechaDesde=2025-01-01&fechaHasta=2025-12-31
+
+
+### GET all noticias asc
+http://localhost:3000/api/noticias?order=asc
 
 
 ### POST a noticia
@@ -9,7 +16,9 @@ Content-Type: application/json
 
 {
   "titulo": "Torneo de fútbol regional", 
-  "descripcion": "Un torneo emocionante con equipos locales compitiendo por el campeonato."
+  "descripcion": "Un torneo emocionante con equipos locales compitiendo por el campeonato.",
+  "fecha": "2024-06-15"
+
 }
 
 ### ID

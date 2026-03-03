@@ -12,13 +12,13 @@ Content-Type: application/json
     "hora": "15:00",
     "juez": "Juan Perez",
     "resultado": "2-1",
-    "equipoLocal": 2,
+    "equipoLocal": 1,
     "equipoVisitante": 2,
     "mvp": 1,
     "maxAnotador": 1,
     "evento": 1,
-    "establecimiento": 1,
-    "participations": [2, 3]
+    "establecimiento": 1
+
 }
 
 ### ID
@@ -75,3 +75,6 @@ Content-Type: application/json
 ### DELETE a partido
 @idToDelete = {{createPartidoToDelete.response.body.data.id}}
 DELETE http://localhost:3000/api/partidos/{{idToDelete}}
+
+### DELETE a partido
+DELETE http://localhost:3000/api/partidos/1

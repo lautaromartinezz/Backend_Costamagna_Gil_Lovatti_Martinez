@@ -1,14 +1,18 @@
 import { MikroORM } from '@mikro-orm/core';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import { MySqlDriver } from '@mikro-orm/mysql';
+import { config } from '../config.js';
+
+// Construir URL de conexión desde variables de entorno
+const clientUrl = `mysql://${config.DB.USER}:${config.DB.PASSWORD}@${config.DB.HOST}:${config.DB.PORT}/${config.DB.NAME}`;
 
 export const orm = await MikroORM.init({
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
   driver: MySqlDriver,
-  clientUrl: 'mysql://dsw:dsw@localhost:3307/gestortorneos',
+  clientUrl,
   highlighter: new SqlHighlighter(),
-  debug: true,
+  debug: config.isDevelopment(),
   schemaGenerator: {
     //never in production
     disableForeignKeys: true,
