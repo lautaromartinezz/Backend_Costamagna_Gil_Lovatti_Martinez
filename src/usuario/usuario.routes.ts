@@ -38,7 +38,6 @@ usuarioRouter.get('/:id', authMiddleware, requireAdmin, findOne);
 usuarioRouter.put(
   '/:id',
   authMiddleware,
-  requireAdmin,
   sanitizeUsuarioInput,
   update,
 );

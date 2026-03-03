@@ -14,7 +14,7 @@ function sanitizeEquipoInput(req: Request, res: Response, next: NextFunction) {
     capitan: req.body.capitan,
     puntos: req.body.puntos,
     esPublico: req.body.esPublico,
-    contraseña: req.body.contraseña,
+    contrasenia: req.body.contrasenia,
     id: req.body.id,
     evento: req.body.evento,
     miembros: req.body.miembros ? req.body.miembros : [],

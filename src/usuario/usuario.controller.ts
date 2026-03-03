@@ -15,7 +15,7 @@ function sanitizeUsuarioInput(req: Request, res: Response, next: NextFunction) {
     nombre: req.body.nombre,
     apellido: req.body.apellido,
     usuario: req.body.usuario,
-    contraseña: req.body.contraseña,
+    contrasenia: req.body.contrasenia,
     email: req.body.email,
     role: req.body.role ? req.body.role : 'Usuario',
     id: req.body.id,
@@ -121,8 +121,8 @@ async function add(req: Request, res: Response) {
     }
 
     usuario = em.create(Usuario, input);
-    const hashedPassword = await bcrypt.hash(usuario.contraseña, 8);
-    usuario.contraseña = hashedPassword;
+    const hashedPassword = await bcrypt.hash(usuario.contrasenia, 8);
+    usuario.contrasenia = hashedPassword;
     await em.flush();
     res.status(201).json({ message: 'Usuario creado', data: usuario });
   } catch (error: any) {
@@ -181,17 +181,17 @@ async function remove(req: Request, res: Response) {
 }
 
 async function loginUsuario(req: Request, res: Response) {
-  const { usuario, contraseña, remember } = req.body;
+  const { usuario, contrasenia, remember } = req.body;
   const userRepo = em.getRepository(Usuario);
   try {
     const user = await userRepo.findOneOrFail({ usuario });
     if (!user) {
-      res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+      res.status(401).json({ message: 'Usuario o contrasenia incorrectos' });
       return;
     }
-    const match = await bcrypt.compare(contraseña, user.contraseña);
+    const match = await bcrypt.compare(contrasenia, user.contrasenia);
     if (!match) {
-      res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+      res.status(401).json({ message: 'Usuario o contrasenia incorrectos' });
       return;
     }
     // Armamos el payload con los datos mínimos
@@ -231,7 +231,7 @@ async function loginUsuario(req: Request, res: Response) {
     user.ultimoLogin = new Date();
     await em.flush();
   } catch (error) {
-    res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+    res.status(401).json({ message: 'Usuario o contrasenia incorrectos' });
   }
 }
 async function restaurarUsuario(req: Request, res: Response) {

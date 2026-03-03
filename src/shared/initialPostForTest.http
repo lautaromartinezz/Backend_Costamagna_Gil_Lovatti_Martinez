@@ -7,7 +7,7 @@ Content-Type: application/json
   "nombre" : "Jose",
   "apellido" : "Perez",
   "usuario" : "josep",
-  "contraseña" : "123456",
+  "contrasenia" : "123456",
   "email" : "jose@example.com",
   "esAdmin" : false,
   "fechaNacimiento" : "1990-01-01"
@@ -46,7 +46,7 @@ Content-Type: application/json
     "nombre": "Mundial FIFA",
     "esPublico": true,
     "cantEquiposMax": 32,
-    "contraseña": "1234",
+    "contrasenia": "1234",
     "fechaInicioInscripcion": "2025-10-01T00:00:00Z",
     "fechaFinInscripcion": "2025-10-15T00:00:00Z",
     "fechaInicioEvento": "2025-11-01T00:00:00Z",
@@ -64,7 +64,7 @@ Content-Type: application/json
   "nombreCapitan" : "Daniel Carvajal",
   "puntos" : 999,
   "esPublico": true,
-  "contraseña": "1234",
+  "contrasenia": "1234",
   "evento": 1,
   "miembros" : [1] 
 }

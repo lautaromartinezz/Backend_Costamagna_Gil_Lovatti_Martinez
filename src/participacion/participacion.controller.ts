@@ -105,7 +105,7 @@ const traerparticipacionesporequipo: RequestHandler = async function (
 ) {
   try {
     const partidoIdRaw = (req.query.partidoId ?? req.query.partidoid) as string;
-    const equipoIdRaw = (req.query.equipoid ?? req.query.equipo) as string;
+    const equipoIdRaw = (req.query.equipoId ?? req.query.equipoid ?? req.query.equipo) as string;
     const idpartido = Number.parseInt(partidoIdRaw);
     const equipoid = Number.parseInt(equipoIdRaw);
 

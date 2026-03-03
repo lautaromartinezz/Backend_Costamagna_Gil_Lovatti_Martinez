@@ -136,38 +136,44 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
-  const sanitizedPartido = req.body.sanitizedInput;
-  const evento = await em.findOneOrFail(Evento, {
-    id: sanitizedPartido.evento,
-  });
-  const fechaStr: string | undefined = sanitizedPartido.fecha;
-  const partidoDate = (() => {
-    if (fechaStr) return new Date(`${fechaStr}`);
-  })();
-
-  const inicio = evento?.fechaInicioEvento
-    ? new Date(evento.fechaInicioEvento)
-    : null;
-  const fin = evento?.fechaFinEvento ? new Date(evento.fechaFinEvento) : null;
-
-  if (
-    inicio &&
-    partidoDate &&
-    fin &&
-    !(partidoDate >= inicio && partidoDate <= fin)
-  ) {
-    res.status(400).json({
-      message: 'El partido no se puede crear fuera del rango del evento',
-    });
-    return;
-  }
-  if (sanitizedPartido.equipoLocal === sanitizedPartido.equipoVisitante) {
-    res.status(400).json({
-      message: 'El equipo local y visitante no pueden ser el mismo',
-    });
-    return;
-  }
   try {
+    const sanitizedPartido = req.body.sanitizedInput;
+
+    if (
+      sanitizedPartido.equipoLocal !== undefined &&
+      sanitizedPartido.equipoVisitante !== undefined &&
+      sanitizedPartido.equipoLocal === sanitizedPartido.equipoVisitante
+    ) {
+      res.status(400).json({
+        message: 'El equipo local y visitante no pueden ser el mismo',
+      });
+      return;
+    }
+
+    if (sanitizedPartido.evento !== undefined && sanitizedPartido.fecha) {
+      const evento = await em.findOneOrFail(Evento, {
+        id: sanitizedPartido.evento,
+      });
+
+      const partidoDate = new Date(`${sanitizedPartido.fecha}`);
+      const inicio = evento.fechaInicioEvento
+        ? new Date(evento.fechaInicioEvento)
+        : null;
+      const fin = evento.fechaFinEvento ? new Date(evento.fechaFinEvento) : null;
+
+      if (
+        inicio &&
+        fin &&
+        !Number.isNaN(partidoDate.getTime()) &&
+        !(partidoDate >= inicio && partidoDate <= fin)
+      ) {
+        res.status(400).json({
+          message: 'El partido no se puede crear fuera del rango del evento',
+        });
+        return;
+      }
+    }
+
     const id = Number.parseInt(req.params.id);
     const partidoToUpdate = await em.findOneOrFail(Partido, { id });
     em.assign(partidoToUpdate, req.body.sanitizedInput);

@@ -14,7 +14,7 @@ function sanitizeEventoInput(req: Request, res: Response, next: NextFunction) {
     descripcion: req.body.descripcion,
     esPublico: req.body.esPublico,
     id: req.body.id,
-    contraseña: req.body.contraseña,
+    contrasenia: req.body.contrasenia,
     cantEquiposMax: req.body.cantEquiposMax,
     fechaInicioInscripcion: req.body.fechaInicioInscripcion,
     fechaFinInscripcion: req.body.fechaFinInscripcion,

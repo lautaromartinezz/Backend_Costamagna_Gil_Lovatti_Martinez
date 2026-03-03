@@ -28,7 +28,7 @@ export class Equipo extends BaseEntity {
   esPublico!: boolean;
 
   @Property({ nullable: true })
-  contraseña!: string;
+  contrasenia!: string;
 
   @ManyToMany(() => Usuario)
   miembros = new Collection<Usuario>(this);

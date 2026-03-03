@@ -25,7 +25,7 @@ export class Evento extends BaseEntity {
   @Property({ nullable: false })
   esPublico!: boolean;
   @Property({ nullable: true })
-  contraseña?: string;
+  contrasenia?: string;
   @Property({ nullable: false })
   cantEquiposMax!: Number;
   @Property({ nullable: false })

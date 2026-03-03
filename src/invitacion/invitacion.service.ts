@@ -97,11 +97,7 @@ export async function sendInvitationEmail({
         </html>
       `,
     });
-
-    if (error) {
-      console.error('Resend error:', error);
-      return { success: false, error: error.message };
-    }
+    
 
     return { success: true };
   } catch (error: any) {
