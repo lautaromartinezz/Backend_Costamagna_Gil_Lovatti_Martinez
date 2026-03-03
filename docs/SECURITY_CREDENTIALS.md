@@ -79,7 +79,8 @@ Las credenciales documentadas revelan:
 DB_USER=dsw
 DB_PASSWORD=dsw
 JWT_SECRET=mi_clave_secreta_123
-RESEND_API_KEY=re_AbCdEfGh123456
+GMAIL_USER=mi_correo@gmail.com
+GMAIL_APP_PASSWORD=abcd efgh ijkl mnop
 ```
 
 #### ✅ BIEN
@@ -92,7 +93,11 @@ DB_PASSWORD=tu_password_seguro
 # JWT (generar con: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
 JWT_SECRET=generar_clave_aleatoria_128_caracteres
 
-# Resend (obtener en: https://resend.com/api-keys)
+# Gmail SMTP
+GMAIL_USER=tu_correo@gmail.com
+GMAIL_APP_PASSWORD=tu_app_password_de_16_caracteres
+
+# Resend legacy (opcional)
 RESEND_API_KEY=re_TuApiKeyAqui
 ```
 
@@ -313,7 +318,8 @@ git push origin --force --all
 ```
 
 ### Paso 4: Revocar API keys expuestas
-- **Resend**: https://resend.com/api-keys → Delete key → Create new
+- **Gmail**: revocar contraseña de aplicación y generar una nueva en https://myaccount.google.com/apppasswords
+- **Resend (legacy)**: https://resend.com/api-keys → Delete key → Create new
 - **Google Maps**: https://console.cloud.google.com/ → Credentials → Delete → Create new
 - **JWT_SECRET**: Generar nueva clave (todos los usuarios deben re-logearse)
 

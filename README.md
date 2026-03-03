@@ -10,6 +10,7 @@
 - [Pre-requisitos](#-pre-requisitos)
 - [Instalación Completa](#-instalación-completa-paso-a-paso)
 - [Uso Diario](#-uso-diario)
+- [Tests](#-tests)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Troubleshooting](#-problemas-comunes-troubleshooting)
 - [Documentación Completa](#-documentación-completa)
@@ -135,7 +136,7 @@ NAMES            IMAGE                    PORTS
 gestor-torneos   percona/percona-server   0.0.0.0:3307->3306/tcp
 ```
 
-📚 **Más detalles:** Ver [DOCKER_DATABASE.md](DOCKER_DATABASE.md)
+📚 **Más detalles:** Ver [docs/DOCKER_DATABASE.md](docs/DOCKER_DATABASE.md)
 
 ---
 
@@ -170,8 +171,10 @@ DB_PASSWORD=tu_password      # ← Cambia esto
 JWT_SECRET=pega_aqui_la_clave_que_generes
 
 # Email (opcional por ahora, ver más abajo)
-RESEND_API_KEY=tu_api_key_aqui
+GMAIL_USER=tu_correo@gmail.com
+GMAIL_APP_PASSWORD=tu_app_password_de_16_caracteres
 EMAIL_FROM=noreply@tudominio.com
+# RESEND_API_KEY=re_...   # Legacy opcional
 
 # Frontend (puedes dejarlo así)
 FRONTEND_URL=http://localhost:5173
@@ -197,13 +200,15 @@ abc123def456789...  (128 caracteres)
 #### 3.4 - (Opcional) Configurar Email
 
 Si quieres que el sistema envíe emails de invitación:
-1. Ve a https://resend.com y crea una cuenta
-2. Obtén tu API key
-3. Pégala en `RESEND_API_KEY=` en tu `.env`
+1. Usa una cuenta de Gmail para envío SMTP
+2. Habilita verificación en 2 pasos en Google
+3. Genera una contraseña de aplicación en https://myaccount.google.com/apppasswords
+4. Pega los valores en `GMAIL_USER=` y `GMAIL_APP_PASSWORD=` en tu `.env`
+5. (Opcional) Usa `RESEND_API_KEY` solo por compatibilidad legacy
 
 **Si no configuras esto ahora, el sistema funcionará pero no enviará emails.**
 
-📚 **Más detalles:** Ver [CONFIGURACION_ENV.md](CONFIGURACION_ENV.md)
+📚 **Más detalles:** Ver [docs/CONFIGURACION_ENV.md](docs/CONFIGURACION_ENV.md)
 
 ---
 
@@ -315,6 +320,23 @@ El servidor mostrará en tiempo real toda la actividad:
 
 ---
 
+## 🧪 Tests
+
+### Ejecutar tests de backend
+
+```bash
+# Ejecuta tests en modo interactivo (watch)
+pnpm test
+
+# Ejecuta tests una sola vez (ideal para CI)
+pnpm run test:run
+
+# Interfaz visual de Vitest
+pnpm run test:ui
+```
+
+---
+
 ## 📁 Estructura del Proyecto
 
 ```
@@ -330,6 +352,11 @@ Backend_Costamagna_Gil_Lovatti_Martinez/
 │   ├── usuario/                  # Módulo de usuarios
 │   ├── evento/                   # Módulo de eventos/torneos
 │   └── ...                       # Otros módulos
+├── docs/                         # Documentación técnica
+│   ├── CONFIGURACION_ENV.md
+│   ├── DOCKER_DATABASE.md
+│   ├── JWT_SECURITY.md
+│   └── SECURITY_CREDENTIALS.md
 ├── dist/                         # Código compilado (generado)
 ├── node_modules/                 # Dependencias (generado)
 ├── .env                          # TU configuración (NO commitear)
@@ -464,23 +491,23 @@ npm install -g pnpm
 
 ### Guías Detalladas
 
-- **[CONFIGURACION_ENV.md](CONFIGURACION_ENV.md)** - Todo sobre variables de entorno
+- **[docs/CONFIGURACION_ENV.md](docs/CONFIGURACION_ENV.md)** - Todo sobre variables de entorno
   - Cómo generar claves seguras
   - Diferencia entre desarrollo y producción
   - Variables opcionales vs obligatorias
 
-- **[JWT_SECURITY.md](JWT_SECURITY.md)** - Entender JWT y seguridad
+- **[docs/JWT_SECURITY.md](docs/JWT_SECURITY.md)** - Entender JWT y seguridad
   - Qué es JWT y cómo funciona
   - Por qué es importante JWT_SECRET
   - Demo interactivo
 
-- **[DOCKER_DATABASE.md](DOCKER_DATABASE.md)** - Gestión de base de datos
+- **[docs/DOCKER_DATABASE.md](docs/DOCKER_DATABASE.md)** - Gestión de base de datos
   - Comandos útiles de Docker
   - Cómo hacer backup
   - Cómo restaurar datos
   - Recrear el contenedor
 
-- **[SECURITY_CREDENTIALS.md](SECURITY_CREDENTIALS.md)** - Seguridad de credenciales
+- **[docs/SECURITY_CREDENTIALS.md](docs/SECURITY_CREDENTIALS.md)** - Seguridad de credenciales
   - Por qué no documentar credenciales
   - Mejores prácticas
   - Qué hacer si expusiste credenciales
@@ -490,6 +517,9 @@ npm install -g pnpm
 ```bash
 # Validar configuración
 node check-config.js
+
+# Ejecutar tests una vez
+pnpm run test:run
 
 # Auditar seguridad de credenciales
 node check-credentials.js
@@ -581,7 +611,9 @@ Marca cada paso a medida que lo completes:
 | `DB_PASSWORD` | Contraseña de MySQL | ✅ |
 | `JWT_SECRET` | Clave para firmar tokens | ✅ |
 | `JWT_EXPIRES_IN` | Tiempo de expiración de tokens | ❌ (default: 24h) |
-| `RESEND_API_KEY` | API key para enviar emails | ❌ (emails deshabilitados sin esto) |
+| `GMAIL_USER` | Cuenta Gmail usada como emisor SMTP | ❌ (emails deshabilitados sin esto) |
+| `GMAIL_APP_PASSWORD` | Contraseña de aplicación Gmail (16 chars) | ❌ (emails deshabilitados sin esto) |
+| `RESEND_API_KEY` | API key legacy (compatibilidad) | ❌ |
 | `EMAIL_FROM` | Email remitente | ❌ |
 | `FRONTEND_URL` | URL del frontend para CORS | ✅ |
 | `NODE_ENV` | Entorno (development/production) | ❌ (default: development) |

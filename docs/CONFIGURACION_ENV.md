@@ -35,11 +35,17 @@ openssl rand -base64 64
 -join (1..64 | ForEach-Object { '{0:X2}' -f (Get-Random -Max 256) })
 ```
 
-#### **RESEND_API_KEY**
-1. Regístrate en [Resend](https://resend.com)
-2. Ve a [API Keys](https://resend.com/api-keys)
-3. Crea una nueva API key
-4. Copia la key que empieza con `re_`
+#### **GMAIL_USER y GMAIL_APP_PASSWORD**
+1. Usa una cuenta de Gmail para el envío
+2. Habilita verificación en 2 pasos en Google
+3. Ve a https://myaccount.google.com/apppasswords
+4. Genera una contraseña de aplicación para "Correo"
+5. Configura en `.env`:
+  - `GMAIL_USER=tu_correo@gmail.com`
+  - `GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx`
+
+#### **RESEND_API_KEY (legacy opcional)**
+Se mantiene por compatibilidad, pero el flujo principal actual usa Gmail SMTP con Nodemailer.
 
 #### **Base de Datos**
 Configura según tu instalación local de MySQL/MariaDB.
@@ -117,7 +123,9 @@ import { config } from './shared/config.js';
 config.PORT              // 3000
 config.NODE_ENV          // development
 config.JWT.SECRET        // tu clave secreta
-config.EMAIL.API_KEY     // Resend API key
+config.EMAIL.GMAIL_USER  // Cuenta Gmail SMTP
+config.EMAIL.GMAIL_APP_PASSWORD // App password de Gmail
+config.EMAIL.RESEND_API_KEY // Legacy opcional
 config.FRONTEND_URL      // http://localhost:5173
 
 // Métodos helper:
@@ -150,7 +158,8 @@ const requiredVars = [
   'DB_HOST',
   'DB_NAME',
   'DB_USER',
-  'RESEND_API_KEY'
+  'GMAIL_USER',
+  'GMAIL_APP_PASSWORD'
 ];
 
 const missing = requiredVars.filter(varName => !process.env[varName]);
@@ -169,7 +178,7 @@ console.log('✅ Todas las variables de entorno están configuradas');
 - [ ] Copiar `.env.example` a `.env`
 - [ ] Generar `JWT_SECRET` seguro
 - [ ] Configurar credenciales de base de datos
-- [ ] Obtener `RESEND_API_KEY`
+- [ ] Configurar `GMAIL_USER` y `GMAIL_APP_PASSWORD`
 - [ ] Verificar que `.env` está en `.gitignore`
 - [ ] Probar que el servidor inicia correctamente
 - [ ] Documentar variables adicionales en `.env.example`
@@ -179,7 +188,10 @@ console.log('✅ Todas las variables de entorno están configuradas');
 ### "JWT_SECRET is not defined"
 → Asegúrate de que `dotenv/config` está importado al inicio de `app.ts`
 
-### "Invalid API key"
+### "No se puede enviar email"
+→ Verifica que `GMAIL_USER` y `GMAIL_APP_PASSWORD` estén configuradas correctamente
+
+### "Invalid API key" (solo modo legacy)
 → Verifica que tu `RESEND_API_KEY` es válida y está activa
 
 ### "Cannot connect to database"
