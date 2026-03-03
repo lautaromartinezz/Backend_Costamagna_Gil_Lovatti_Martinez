@@ -328,7 +328,7 @@ async function findXCreator(req: Request, res: Response) {
     const eventos = await em.find(
       Evento,
       { creador: { id: userId } },
-      { populate: ['deporte', 'localidad', 'creador'] },
+      { populate: ['deporte', 'localidad', 'creador', 'equipos.miembros'] },
     );
     res.status(200).json({ message: 'Eventos del creador', data: eventos });
   } catch (error: any) {
