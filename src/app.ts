@@ -22,37 +22,33 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const normalizeOrigin = (value: string) => value.replace(/\/+$/, '');
-const allowedOrigins = new Set([
-  normalizeOrigin(config.FRONTEND_URL),
-  'http://localhost:5173',
-  'https://gestor-torneos.up.railway.app',
-]);
-
-console.log('🔧 CORS orígenes permitidos:', [...allowedOrigins].join(', '));
+console.log('🔧 CORS habilitado con origen reflejado (origin: true)');
+console.log('🔧 FRONTEND_URL configurado:', config.FRONTEND_URL);
 
 const corsMiddleware = cors({
-  origin: (origin, callback) => {
-    if (!origin) {
-      callback(null, true);
-      return;
-    }
-
-    const normalizedOrigin = normalizeOrigin(origin);
-    if (allowedOrigins.has(normalizedOrigin)) {
-      callback(null, true);
-      return;
-    }
-
-    callback(new Error(`CORS bloqueado para origen: ${origin}`));
-  },
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Cache-Control',
+    'Pragma',
+  ],
+  optionsSuccessStatus: 204,
 });
 
 app.use(corsMiddleware);
-app.options('*', corsMiddleware);
+app.options(/.*/, corsMiddleware);
+
+app.use((req, _, next) => {
+  const origin = req.headers.origin || 'sin-origin';
+  console.log(`🌐 ${req.method} ${req.path} | origin=${origin}`);
+  next();
+});
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
