@@ -22,17 +22,37 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// Debug CORS configuration
-console.log('🔧 CORS configurado para origen:', config.FRONTEND_URL);
+const normalizeOrigin = (value: string) => value.replace(/\/+$/, '');
+const allowedOrigins = new Set([
+  normalizeOrigin(config.FRONTEND_URL),
+  'http://localhost:5173',
+  'https://gestor-torneos.up.railway.app',
+]);
 
-app.use(
-  cors({
-    origin: config.FRONTEND_URL,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }),
-);
+console.log('🔧 CORS orígenes permitidos:', [...allowedOrigins].join(', '));
+
+const corsMiddleware = cors({
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    const normalizedOrigin = normalizeOrigin(origin);
+    if (allowedOrigins.has(normalizedOrigin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS bloqueado para origen: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+});
+
+app.use(corsMiddleware);
+app.options('*', corsMiddleware);
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
